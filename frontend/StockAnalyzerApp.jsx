@@ -14,7 +14,8 @@ import React, { useState, useEffect, useMemo } from "react";
 // バックエンドAPIのベースURL。
 // Renderにデプロイしたら、そのURLに書き換えてください。
 // 例: "https://kabuka-bunseki-kun-api.onrender.com"
-const API_BASE_URL = "https://YOUR-RENDER-APP.onrender.com";
+// 今回はこれhttps://kabuka-bunseki-kun-api.onrender.com
+const API_BASE_URL = "https://kabuka-bunseki-kun-api.onrender.com";
 
 function formatDateShort(dateStr) {
   const d = new Date(dateStr);
