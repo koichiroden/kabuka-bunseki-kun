@@ -1,5 +1,6 @@
 (() => {
   // component_body_named.jsx
+  var { useState, useEffect, useMemo } = React;
   var API_BASE_URL = "https://kabuka-bunseki-kun-api.onrender.com";
   function formatDateShort(dateStr) {
     const d = new Date(dateStr);
