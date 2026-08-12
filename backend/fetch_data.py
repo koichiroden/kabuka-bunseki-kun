@@ -22,6 +22,7 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 import yfinance as yf
+from curl_cffi import requests as curl_requests
 
 from stocks import STOCKS, ticker_symbol
 from analysis import compute_signal
@@ -32,12 +33,18 @@ OUTPUT_PATH = Path(__file__).parent / "data" / "stocks.json"
 # yfinanceのレート制限対策：1銘柄ごとに間隔を空ける（秒）
 REQUEST_INTERVAL_SEC = 1.2
 
+# Yahoo Finance側のボット対策(TLSフィンガープリント判定)を回避するため、
+# ブラウザに偽装したセッション(curl_cffi)をyfinanceに渡す。
+# 通常のrequestsセッションだとJSONではなくエラーページが返ってきて
+# 「Expecting value: line 1 column 1 (char 0)」のようなエラーになることがある。
+_session = curl_requests.Session(impersonate="chrome")
+
 
 def fetch_one(stock: dict) -> dict | None:
     """1銘柄分のデータを取得して分析結果付きのdictを返す。失敗時はNone。"""
     symbol = ticker_symbol(stock["code"])
     try:
-        ticker = yf.Ticker(symbol)
+        ticker = yf.Ticker(symbol, session=_session)
 
         # 過去400日分の日足を取得（土日・祝日を除いた営業日ベースで365日以上確保するため余裕を持たせる）
         hist = ticker.history(period="400d", interval="1d")
