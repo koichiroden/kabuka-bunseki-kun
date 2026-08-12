@@ -7,3 +7,12 @@ services:
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
     autoDeploy: true
+
+  - type: web
+    name: kabuka-bunseki-kun-frontend
+    runtime: static
+    plan: free
+    rootDir: frontend
+    buildCommand: "true"
+    staticPublishPath: .
+    autoDeploy: true
