@@ -11,7 +11,6 @@ services:
   - type: web
     name: kabuka-bunseki-kun-frontend
     runtime: static
-    plan: free
     rootDir: frontend
     buildCommand: "true"
     staticPublishPath: .
