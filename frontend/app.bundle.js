@@ -46,7 +46,9 @@
       let cancelled = false;
       async function load() {
         try {
-          const res = await fetch(`${API_BASE_URL}/api/stocks`);
+          const res = await fetch(`${API_BASE_URL}/api/stocks?t=${Date.now()}`, {
+            cache: "no-store"
+          });
           if (!res.ok) {
             throw new Error(`API\u30A8\u30E9\u30FC: \u30B9\u30C6\u30FC\u30BF\u30B9 ${res.status}`);
           }
