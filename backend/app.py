@@ -30,7 +30,10 @@ def get_stocks():
         return jsonify({"error": "データがまだ生成されていません。GitHub Actionsの実行をお待ちください。"}), 503
     with open(DATA_PATH, "r", encoding="utf-8") as f:
         data = json.load(f)
-    return jsonify(data)
+    response = jsonify(data)
+    # ブラウザやCDNに古いデータをキャッシュさせない
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    return response
 
 
 @app.get("/api/health")
