@@ -1,0 +1,40 @@
+name: 株価データ更新
+
+on:
+  schedule:
+    # 東証の引けは15:00 JST。データ反映の余裕を見て 15:40 JST (06:40 UTC) に実行。
+    # 日本は祝日でも動いてしまうため、祝日判定は fetch_data.py 側では行わず、
+    # 失敗銘柄が出ても処理は継続する設計にしている。
+    - cron: "40 6 * * 1-5"
+  workflow_dispatch: {} # 手動実行用ボタンを有効化
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: Python セットアップ
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 依存パッケージのインストール
+        working-directory: backend
+        run: pip install -r requirements.txt
+
+      - name: データ取得を実行
+        working-directory: backend
+        run: python fetch_data.py
+
+      - name: 変更をコミット
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add backend/data/stocks.json
+          git diff --staged --quiet || git commit -m "chore: 株価データを自動更新 ($(date -u +'%Y-%m-%d %H:%M UTC'))"
+          git push
