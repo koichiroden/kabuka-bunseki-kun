@@ -37,4 +37,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add backend/data/stocks.json
           git diff --staged --quiet || git commit -m "chore: 株価データを自動更新 ($(date -u +'%Y-%m-%d %H:%M UTC'))"
+          # pushする前にリモートの最新変更を取り込む
+          # （手動でのファイル編集などとタイミングが重なった場合の衝突を防ぐため）
+          git pull --rebase origin main
           git push
