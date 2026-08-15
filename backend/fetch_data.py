@@ -84,6 +84,7 @@ def fetch_one(stock: dict) -> dict | None:
             "prices": prices,
             "latestPrice": prices[-1],
             "dividendYield": round(dividend_yield, 2),
+            "sma30": signal["sma30"],
             "signal": {
                 "trends": signal["trends"],
                 "bottom": signal["bottom"],
