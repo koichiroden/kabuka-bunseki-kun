@@ -19,6 +19,7 @@
       sector: raw.sector,
       dates: raw.dates,
       prices: raw.prices,
+      sma30: raw.sma30 || null,
       latestPrice: raw.latestPrice,
       dividendYield: raw.dividendYield,
       signal: {
@@ -78,13 +79,17 @@
     }, []);
     return state;
   }
-  function Sparkline({ prices, dates, highlightIdx, width = 220, height = 56, showAxis = false }) {
+  function Sparkline({ prices, dates, sma, highlightIdx, width = 220, height = 56, showAxis = false }) {
     const n = prices.length;
-    const sliceLen = Math.min(90, n);
-    const slice = prices.slice(n - sliceLen);
-    const dateSlice = dates ? dates.slice(n - sliceLen) : null;
-    const min = Math.min(...slice);
-    const max = Math.max(...slice);
+    const sliceLen = Math.min(180, n);
+    const offset = n - sliceLen;
+    const slice = prices.slice(offset);
+    const dateSlice = dates ? dates.slice(offset) : null;
+    const smaSlice = sma ? sma.slice(offset) : null;
+    const smaValues = smaSlice ? smaSlice.filter((v) => v !== null && v !== void 0) : [];
+    const allValues = [...slice, ...smaValues];
+    const min = Math.min(...allValues);
+    const max = Math.max(...allValues);
     const range = max - min || 1;
     const axisHeight = showAxis ? 18 : 0;
     const plotHeight = height - axisHeight;
@@ -95,10 +100,24 @@
       return [x, y];
     });
     const path = pts.map(([x, y], i) => `${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`).join(" ");
+    let smaPath = "";
+    if (smaSlice) {
+      let started = false;
+      smaSlice.forEach((v, i) => {
+        if (v === null || v === void 0) {
+          started = false;
+          return;
+        }
+        const x = i * stepX;
+        const y = plotHeight - (v - min) / range * (plotHeight - 8) - 4;
+        smaPath += `${started ? "L" : "M"}${x.toFixed(1)},${y.toFixed(1)} `;
+        started = true;
+      });
+    }
     let hlPoint = null;
     let hlDate = null;
     if (highlightIdx !== void 0 && highlightIdx !== null) {
-      const sliceIdx = highlightIdx - (n - slice.length);
+      const sliceIdx = highlightIdx - offset;
       if (sliceIdx >= 0 && sliceIdx < slice.length) {
         hlPoint = pts[sliceIdx];
         hlDate = dateSlice ? dateSlice[sliceIdx] : null;
@@ -128,7 +147,17 @@
         onTouchMove: (e) => handleMove(e.touches[0].clientX, e.currentTarget.getBoundingClientRect()),
         onTouchEnd: () => setTimeout(() => setHoverIdx(null), 1200)
       },
-      /* @__PURE__ */ React.createElement("svg", { width, height, className: "sparkline", viewBox: `0 0 ${width} ${height}` }, /* @__PURE__ */ React.createElement("path", { d: path, fill: "none", stroke: "var(--line-color, #4FD1C5)", strokeWidth: "1.6" }), hoverPoint && /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement(
+      /* @__PURE__ */ React.createElement("svg", { width, height, className: "sparkline", viewBox: `0 0 ${width} ${height}` }, smaPath && /* @__PURE__ */ React.createElement(
+        "path",
+        {
+          d: smaPath,
+          fill: "none",
+          stroke: "#F0A857",
+          strokeWidth: "1.3",
+          strokeDasharray: "3,2",
+          opacity: "0.85"
+        }
+      ), /* @__PURE__ */ React.createElement("path", { d: path, fill: "none", stroke: "var(--line-color, #4FD1C5)", strokeWidth: "1.6" }), hoverPoint && /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement(
         "line",
         {
           x1: hoverPoint[0],
@@ -182,12 +211,13 @@
   }
   function StockCard({ stock, onOpen }) {
     const { signal } = stock;
-    const bottomIdxGlobal = signal.bottom.isBottom || signal.bottom.minIdx !== void 0 ? stock.prices.length - 14 + signal.bottom.minIdx : null;
+    const bottomIdxGlobal = signal.bottom.isBottom ? signal.bottom.minIdx : null;
     return /* @__PURE__ */ React.createElement("button", { className: "stock-card", onClick: () => onOpen(stock) }, /* @__PURE__ */ React.createElement("div", { className: "stock-card__top" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { className: "stock-card__name" }, stock.name), /* @__PURE__ */ React.createElement("div", { className: "stock-card__meta" }, stock.code, " \u30FB ", stock.sector)), /* @__PURE__ */ React.createElement(VerdictBadge, { verdict: signal.verdict })), /* @__PURE__ */ React.createElement("div", { className: "stock-card__body" }, /* @__PURE__ */ React.createElement(
       Sparkline,
       {
         prices: stock.prices,
         dates: stock.dates,
+        sma: stock.sma30,
         highlightIdx: signal.bottom.isBottom ? bottomIdxGlobal : null
       }
     ), /* @__PURE__ */ React.createElement("div", { className: "stock-card__stats" }, /* @__PURE__ */ React.createElement("div", { className: "stat" }, /* @__PURE__ */ React.createElement("span", { className: "stat__label" }, "\u682A\u4FA1"), /* @__PURE__ */ React.createElement("span", { className: "stat__value mono" }, "\xA5", stock.latestPrice.toLocaleString())), /* @__PURE__ */ React.createElement("div", { className: "stat" }, /* @__PURE__ */ React.createElement("span", { className: "stat__label" }, "\u914D\u5F53\u5229\u56DE\u308A"), /* @__PURE__ */ React.createElement("span", { className: "stat__value mono" }, stock.dividendYield.toFixed(1), "%")))), /* @__PURE__ */ React.createElement("div", { className: "stock-card__trends" }, /* @__PURE__ */ React.createElement(TrendChip, { label: "30\u65E5", value: signal.trends.d30 }), /* @__PURE__ */ React.createElement(TrendChip, { label: "60\u65E5", value: signal.trends.d60 }), /* @__PURE__ */ React.createElement(TrendChip, { label: "120\u65E5", value: signal.trends.d120 }), /* @__PURE__ */ React.createElement(TrendChip, { label: "180\u65E5", value: signal.trends.d180 }), /* @__PURE__ */ React.createElement(TrendChip, { label: "365\u65E5", value: signal.trends.d365 })), signal.bottom.isBottom && /* @__PURE__ */ React.createElement("div", { className: "stock-card__bottom-flag" }, "\u5E95\u5024\u30B7\u30B0\u30CA\u30EB\u691C\u77E5\uFF08", signal.bottom.daysSinceMin, "\u65E5\u524D\u306B\u6975\u5C0F\u5024\uFF09"));
@@ -200,12 +230,13 @@
       {
         prices: stock.prices,
         dates: stock.dates,
-        highlightIdx: signal.bottom.isBottom ? stock.prices.length - 14 + signal.bottom.minIdx : null,
+        sma: stock.sma30,
+        highlightIdx: signal.bottom.isBottom ? signal.bottom.minIdx : null,
         width: 320,
         height: 130,
         showAxis: true
       }
-    ), /* @__PURE__ */ React.createElement("div", { className: "modal__price-row" }, /* @__PURE__ */ React.createElement("span", { className: "mono modal__price" }, "\xA5", stock.latestPrice.toLocaleString()), /* @__PURE__ */ React.createElement(VerdictBadge, { verdict: signal.verdict }))), /* @__PURE__ */ React.createElement("div", { className: "modal__section" }, /* @__PURE__ */ React.createElement("div", { className: "modal__section-title" }, "\u914D\u5F53\u5229\u56DE\u308A"), /* @__PURE__ */ React.createElement("div", { className: "modal__dividend mono" }, stock.dividendYield.toFixed(2), "%")), /* @__PURE__ */ React.createElement("div", { className: "modal__section" }, /* @__PURE__ */ React.createElement("div", { className: "modal__section-title" }, "\u9577\u671F\u30C8\u30EC\u30F3\u30C9\u5224\u5B9A"), /* @__PURE__ */ React.createElement("div", { className: "modal__trend-grid" }, /* @__PURE__ */ React.createElement(TrendChip, { label: "30\u65E5", value: signal.trends.d30 }), /* @__PURE__ */ React.createElement(TrendChip, { label: "60\u65E5", value: signal.trends.d60 }), /* @__PURE__ */ React.createElement(TrendChip, { label: "120\u65E5", value: signal.trends.d120 }), /* @__PURE__ */ React.createElement(TrendChip, { label: "180\u65E5", value: signal.trends.d180 }), /* @__PURE__ */ React.createElement(TrendChip, { label: "365\u65E5", value: signal.trends.d365 }))), /* @__PURE__ */ React.createElement("div", { className: "modal__section" }, /* @__PURE__ */ React.createElement("div", { className: "modal__section-title" }, "\u5E95\u5024\uFF08\u6975\u5C0F\u5024\uFF09\u5224\u5B9A"), /* @__PURE__ */ React.createElement("p", { className: "modal__explain" }, signal.bottom.isBottom ? `\u76F4\u8FD1${signal.bottom.daysSinceMin}\u65E5\u524D\u306B\u682A\u4FA1\u306E\u5E95\uFF08\u4E00\u968E\u5FAE\u5206\u304C\u4E0B\u964D\u304B\u3089\u4E0A\u6607\u306B\u8EE2\u63DB\u3057\u3001\u66F2\u7DDA\u304C\u4E0B\u306B\u51F8\uFF09\u3092\u691C\u77E5\u3057\u307E\u3057\u305F\u3002\u53CD\u767A\u306E\u521D\u671F\u6BB5\u968E\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002` : "\u76F4\u8FD1\u3067\u306F\u682A\u4FA1\u306E\u6975\u5C0F\u5024\uFF08\u5E95\u5024\uFF09\u306F\u691C\u51FA\u3055\u308C\u3066\u3044\u307E\u305B\u3093\u3002\u4E0B\u964D\u30C8\u30EC\u30F3\u30C9\u304C\u7D99\u7D9A\u3057\u3066\u3044\u308B\u304B\u3001\u3059\u3067\u306B\u53CD\u767A\u304C\u9032\u884C\u3057\u3066\u3044\u308B\u72B6\u614B\u3067\u3059\u3002")), /* @__PURE__ */ React.createElement("div", { className: "modal__section" }, /* @__PURE__ */ React.createElement("div", { className: "modal__section-title" }, "\u7DCF\u5408\u30B9\u30B3\u30A2"), /* @__PURE__ */ React.createElement("div", { className: "modal__score-bar" }, /* @__PURE__ */ React.createElement(
+    ), /* @__PURE__ */ React.createElement("div", { className: "modal__price-row" }, /* @__PURE__ */ React.createElement("span", { className: "mono modal__price" }, "\xA5", stock.latestPrice.toLocaleString()), /* @__PURE__ */ React.createElement(VerdictBadge, { verdict: signal.verdict }))), /* @__PURE__ */ React.createElement("div", { className: "modal__section" }, /* @__PURE__ */ React.createElement("div", { className: "modal__section-title" }, "\u914D\u5F53\u5229\u56DE\u308A"), /* @__PURE__ */ React.createElement("div", { className: "modal__dividend mono" }, stock.dividendYield.toFixed(2), "%")), /* @__PURE__ */ React.createElement("div", { className: "modal__section" }, /* @__PURE__ */ React.createElement("div", { className: "modal__section-title" }, "\u9577\u671F\u30C8\u30EC\u30F3\u30C9\u5224\u5B9A"), /* @__PURE__ */ React.createElement("div", { className: "modal__trend-grid" }, /* @__PURE__ */ React.createElement(TrendChip, { label: "30\u65E5", value: signal.trends.d30 }), /* @__PURE__ */ React.createElement(TrendChip, { label: "60\u65E5", value: signal.trends.d60 }), /* @__PURE__ */ React.createElement(TrendChip, { label: "120\u65E5", value: signal.trends.d120 }), /* @__PURE__ */ React.createElement(TrendChip, { label: "180\u65E5", value: signal.trends.d180 }), /* @__PURE__ */ React.createElement(TrendChip, { label: "365\u65E5", value: signal.trends.d365 }))), /* @__PURE__ */ React.createElement("div", { className: "modal__section" }, /* @__PURE__ */ React.createElement("div", { className: "modal__section-title" }, "\u5E95\u5024\uFF08\u6975\u5C0F\u5024\uFF09\u5224\u5B9A"), /* @__PURE__ */ React.createElement("div", { className: "modal__legend" }, /* @__PURE__ */ React.createElement("span", { className: "modal__legend-item" }, /* @__PURE__ */ React.createElement("span", { className: "modal__legend-swatch modal__legend-swatch--price" }), "\u682A\u4FA1"), /* @__PURE__ */ React.createElement("span", { className: "modal__legend-item" }, /* @__PURE__ */ React.createElement("span", { className: "modal__legend-swatch modal__legend-swatch--sma" }), "30\u65E5\u79FB\u52D5\u5E73\u5747\u7DDA")), /* @__PURE__ */ React.createElement("p", { className: "modal__explain" }, signal.bottom.isBottom ? `\u76F4\u8FD1${signal.bottom.daysSinceMin}\u65E5\u524D\u306B\u300130\u65E5\u79FB\u52D5\u5E73\u5747\u7DDA\u304C\u5E95\uFF08\u4E0B\u964D\u304B\u3089\u4E0A\u6607\u306B\u8EE2\u63DB\u3057\u3001\u4E0B\u306B\u51F8\uFF09\u3092\u8FCE\u3048\u305F\u3053\u3068\u3092\u691C\u77E5\u3057\u307E\u3057\u305F\u3002\u65E5\u3005\u306E\u7D30\u304B\u306A\u5024\u52D5\u304D\u3067\u306F\u306A\u304F\u3001\u306A\u3089\u3057\u305F\u79FB\u52D5\u5E73\u5747\u7DDA\u3067\u5224\u5B9A\u3057\u3066\u3044\u308B\u305F\u3081\u3001\u4E00\u6642\u7684\u306A\u6025\u843D\u30FB\u6025\u9A30\u306B\u3088\u308B\u8AA4\u691C\u77E5\u304C\u8D77\u304D\u306B\u304F\u304F\u306A\u3063\u3066\u3044\u307E\u3059\u3002\u53CD\u767A\u306E\u521D\u671F\u6BB5\u968E\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002` : "\u76F4\u8FD1\u3067\u306F30\u65E5\u79FB\u52D5\u5E73\u5747\u7DDA\u306E\u6975\u5C0F\u5024\uFF08\u5E95\u5024\uFF09\u306F\u691C\u51FA\u3055\u308C\u3066\u3044\u307E\u305B\u3093\u3002\u4E0B\u964D\u30C8\u30EC\u30F3\u30C9\u304C\u7D99\u7D9A\u3057\u3066\u3044\u308B\u304B\u3001\u3059\u3067\u306B\u53CD\u767A\u304C\u9032\u884C\u3057\u3066\u3044\u308B\u72B6\u614B\u3067\u3059\u3002")), /* @__PURE__ */ React.createElement("div", { className: "modal__section" }, /* @__PURE__ */ React.createElement("div", { className: "modal__section-title" }, "\u7DCF\u5408\u30B9\u30B3\u30A2"), /* @__PURE__ */ React.createElement("div", { className: "modal__score-bar" }, /* @__PURE__ */ React.createElement(
       "div",
       {
         className: "modal__score-fill",
@@ -737,6 +768,40 @@
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
+}
+
+.modal__legend {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+
+.modal__legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.modal__legend-swatch {
+  width: 14px;
+  height: 2px;
+  border-radius: 1px;
+}
+
+.modal__legend-swatch--price {
+  background: var(--teal);
+}
+
+.modal__legend-swatch--sma {
+  background: repeating-linear-gradient(
+    90deg,
+    var(--amber) 0px,
+    var(--amber) 3px,
+    transparent 3px,
+    transparent 5px
+  );
 }
 
 .modal__explain {
