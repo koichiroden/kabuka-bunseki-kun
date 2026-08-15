@@ -1,4 +1,4 @@
-# 株価分析くん(これで動いた)
+# 株価分析くん
 
 日経225・日経グロースの主要銘柄について、配当利回りと長期トレンド（30/60/120/180/365日）、
 株価曲線の底値（極小値）を毎日自動で分析するツールです。
@@ -60,23 +60,43 @@ pushすると `.github/workflows/update_data.yml` が登録されますが、
 > 無料プランは15分間アクセスが無いとスリープします。次回アクセス時に
 > 起動するまで30秒ほどかかることがありますが、動作上の問題はありません。
 
-### 4. フロントエンドのAPI URLを設定する
+### 4. フロントエンドをRenderに静的サイトとしてデプロイする
 
-`frontend/StockAnalyzerApp.jsx` の冒頭にある以下の行を、
-Renderで発行された実際のURLに書き換えてください。
+Claudeのアーティファクト（プレビュー機能）は、セキュリティ上の理由で
+外部API（RenderのバックエンドAPIなど）への通信がブロックされることがあります。
+そのため、フロントエンドも本物のWebページとしてRenderにデプロイし、
+スマホから直接そのURLを開く方式にしています。
 
-```js
-const API_BASE_URL = "https://YOUR-RENDER-APP.onrender.com";
-```
+`frontend/index.html` は、ビルド不要（Babel Standaloneでブラウザ内変換）の
+1ファイル完結型のページです。すでに `API_BASE_URL` に
+バックエンドのURLが設定済みなので、そのままデプロイできます。
 
-書き換えたら、このファイルの中身をClaudeのアーティファクトとして
-貼り付ければ、実データを表示するアプリとしてスマホからも使えます。
+1. Renderのダッシュボードに戻り、「New +」→「Blueprint」を選択
+2. 同じGitHubリポジトリを選ぶ（`render.yaml` が更新されているので自動検知されます）
+3. `kabuka-bunseki-kun-frontend` という Static Site が追加候補として表示されるので、
+   内容を確認して「Apply」
+
+デプロイが終わると、`https://kabuka-bunseki-kun-frontend-xxxx.onrender.com` のような
+URLが発行されます。これをスマホのブラウザで開き、「ホーム画面に追加」しておけば、
+アプリのように使えます。
+
+> バックエンドのURLを変更した場合は、`frontend/index.html` 内の
+> `const API_BASE_URL = "..."` を書き換えてから再度pushしてください。
+> `autoDeploy: true` なので、pushするだけで自動的に再デプロイされます。
 
 ### 5. 動作確認
 
 - ブラウザで `https://あなたのAPI/api/health` を開き、
   `"dataExists": true` になっていればデータ取得は成功しています。
 - `https://あなたのAPI/api/stocks` を開くと、生データ（JSON）が見られます。
+- `https://あなたのフロントエンドURL` を開き、実際の銘柄カードが表示されれば成功です。
+
+## フロントエンドのコードを更新したとき
+
+`frontend/app.bundle.js` を更新して差し替えたときは、`frontend/index.html` の
+`<script src="app.bundle.js?v=3"></script>` の `v=3` の数字を必ず1つ増やしてください
+（`v=4`, `v=5`...）。これを忘れると、ブラウザやRenderのCDNが古いバージョンの
+`app.bundle.js` をキャッシュしたままになり、変更が反映されないことがあります。
 
 ## 銘柄の追加・削除
 
@@ -88,6 +108,11 @@ const API_BASE_URL = "https://YOUR-RENDER-APP.onrender.com";
 `backend/analysis.py` の `compute_signal()` 内のスコア加減点を編集してください。
 フロントエンド側は分析結果をそのまま表示するだけなので、
 判定基準を変えたい場合はこのファイルだけ直せば反映されます。
+
+底値（極小値）の判定は、生の終値ではなく **30日移動平均線** に対して行っています
+（`simple_moving_average()` → `detect_local_minimum()`）。日々の細かい値動き
+（ノイズ）による誤検知を減らすためです。移動平均の日数を変えたい場合は
+`analysis.py` 冒頭の `SMA_WINDOW = 30` を書き換えてください。
 
 ## 今後の拡張候補
 
