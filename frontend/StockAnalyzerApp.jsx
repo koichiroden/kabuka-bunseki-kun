@@ -14,7 +14,6 @@ import React, { useState, useEffect, useMemo } from "react";
 // バックエンドAPIのベースURL。
 // Renderにデプロイしたら、そのURLに書き換えてください。
 // 例: "https://kabuka-bunseki-kun-api.onrender.com"
-// 今回はこれhttps://kabuka-bunseki-kun-api.onrender.com
 const API_BASE_URL = "https://kabuka-bunseki-kun-api.onrender.com";
 
 function formatDateShort(dateStr) {
@@ -38,6 +37,16 @@ function normalizeStock(raw) {
     sector: raw.sector,
     dates: raw.dates,
     prices: raw.prices,
+    sma30: raw.sma30 || null,
+    sma90: raw.sma90 || null,
+    granville: raw.granville
+      ? {
+          trend90: raw.granville.trend90,
+          trend30: raw.granville.trend30,
+          trendDaily: raw.granville.trendDaily,
+          verdict: raw.granville.verdict,
+        }
+      : null,
     latestPrice: raw.latestPrice,
     dividendYield: raw.dividendYield,
     signal: {
@@ -68,7 +77,9 @@ function useStockData() {
 
     async function load() {
       try {
-        const res = await fetch(`${API_BASE_URL}/api/stocks`);
+        const res = await fetch(`${API_BASE_URL}/api/stocks?t=${Date.now()}`, {
+          cache: "no-store",
+        });
         if (!res.ok) {
           throw new Error(`APIエラー: ステータス ${res.status}`);
         }
@@ -103,34 +114,77 @@ function useStockData() {
 
 // ---------- UI サブコンポーネント ----------
 
-function Sparkline({ prices, dates, highlightIdx, width = 220, height = 56, showAxis = false }) {
+function Sparkline({
+  prices,
+  dates,
+  sma30,
+  sma90,
+  highlightIdx,
+  granvilleVerdict,
+  width = 220,
+  height = 56,
+  showAxis = false,
+}) {
   const n = prices.length;
-  const sliceLen = Math.min(90, n);
-  const slice = prices.slice(n - sliceLen);
-  const dateSlice = dates ? dates.slice(n - sliceLen) : null;
-  const min = Math.min(...slice);
-  const max = Math.max(...slice);
+  const sliceLen = Math.min(180, n);
+  const offset = n - sliceLen;
+  const slice = prices.slice(offset);
+  const dateSlice = dates ? dates.slice(offset) : null;
+  const sma30Slice = sma30 ? sma30.slice(offset) : null;
+  const sma90Slice = sma90 ? sma90.slice(offset) : null;
+
+  // 移動平均線も含めて、グラフのY軸の範囲(min/max)を決める
+  // （移動平均だけが極端に外れて見切れないようにするため）
+  const sma30Values = sma30Slice ? sma30Slice.filter((v) => v !== null && v !== undefined) : [];
+  const sma90Values = sma90Slice ? sma90Slice.filter((v) => v !== null && v !== undefined) : [];
+  const allValues = [...slice, ...sma30Values, ...sma90Values];
+  const min = Math.min(...allValues);
+  const max = Math.max(...allValues);
   const range = max - min || 1;
   const axisHeight = showAxis ? 18 : 0;
   const plotHeight = height - axisHeight;
   const stepX = width / (slice.length - 1);
-  const pts = slice.map((p, i) => {
-    const x = i * stepX;
-    const y = plotHeight - ((p - min) / range) * (plotHeight - 8) - 4;
-    return [x, y];
-  });
+
+  const toY = (v) => plotHeight - ((v - min) / range) * (plotHeight - 8) - 4;
+
+  const pts = slice.map((p, i) => [i * stepX, toY(p)]);
   const path = pts.map(([x, y], i) => `${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`).join(" ");
+
+  // 移動平均線のパスを作る共通処理。データが無い(null)区間は線をいったん切る。
+  function buildSmaPath(smaSlice) {
+    if (!smaSlice) return "";
+    let path = "";
+    let started = false;
+    smaSlice.forEach((v, i) => {
+      if (v === null || v === undefined) {
+        started = false;
+        return;
+      }
+      const x = i * stepX;
+      path += `${started ? "L" : "M"}${x.toFixed(1)},${toY(v).toFixed(1)} `;
+      started = true;
+    });
+    return path;
+  }
+
+  const sma30Path = buildSmaPath(sma30Slice);
+  const sma90Path = buildSmaPath(sma90Slice);
 
   // ハイライト（底値点）: highlightIdxはprices全体でのインデックス→sliceに変換
   let hlPoint = null;
   let hlDate = null;
   if (highlightIdx !== undefined && highlightIdx !== null) {
-    const sliceIdx = highlightIdx - (n - slice.length);
+    const sliceIdx = highlightIdx - offset;
     if (sliceIdx >= 0 && sliceIdx < slice.length) {
       hlPoint = pts[sliceIdx];
       hlDate = dateSlice ? dateSlice[sliceIdx] : null;
     }
   }
+
+  // 現在の「買い時/売り時」シグナル点：グラフの一番右（最新日）に表示する
+  const latestPoint = pts.length > 0 ? pts[pts.length - 1] : null;
+  const signalColor =
+    granvilleVerdict === "buy" ? "#3DDC84" : granvilleVerdict === "sell" ? "#E85D5D" : null;
 
   const [hoverIdx, setHoverIdx] = React.useState(null);
 
@@ -164,6 +218,28 @@ function Sparkline({ prices, dates, highlightIdx, width = 220, height = 56, show
       onTouchEnd={() => setTimeout(() => setHoverIdx(null), 1200)}
     >
       <svg width={width} height={height} className="sparkline" viewBox={`0 0 ${width} ${height}`}>
+        {sma90Path && (
+          <path
+            d={sma90Path}
+            fill="none"
+            stroke="#7C9CFF"
+            strokeWidth="1.3"
+            strokeDasharray="6,3"
+            opacity="0.8"
+          />
+        )}
+
+        {sma30Path && (
+          <path
+            d={sma30Path}
+            fill="none"
+            stroke="#F0A857"
+            strokeWidth="1.3"
+            strokeDasharray="3,2"
+            opacity="0.85"
+          />
+        )}
+
         <path d={path} fill="none" stroke="var(--line-color, #4FD1C5)" strokeWidth="1.6" />
 
         {hoverPoint && (
@@ -188,6 +264,24 @@ function Sparkline({ prices, dates, highlightIdx, width = 220, height = 56, show
               <animate attributeName="opacity" values="0.7;0.05;0.7" dur="2s" repeatCount="indefinite" />
             </circle>
             <circle cx={hlPoint[0]} cy={hlPoint[1]} r="3.2" fill="#F0A857" />
+          </>
+        )}
+
+        {latestPoint && signalColor && (
+          <>
+            <circle
+              cx={latestPoint[0]}
+              cy={latestPoint[1]}
+              r="6"
+              fill="none"
+              stroke={signalColor}
+              strokeWidth="1.6"
+              opacity="0.7"
+            >
+              <animate attributeName="r" values="4;9;4" dur="1.6s" repeatCount="indefinite" />
+              <animate attributeName="opacity" values="0.8;0.05;0.8" dur="1.6s" repeatCount="indefinite" />
+            </circle>
+            <circle cx={latestPoint[0]} cy={latestPoint[1]} r="3.4" fill={signalColor} />
           </>
         )}
 
@@ -254,12 +348,39 @@ function VerdictBadge({ verdict }) {
   return <span className={`badge ${map[verdict] || "badge--neutral"}`}>{verdict}</span>;
 }
 
+// グランビルの法則（90日・30日・日次トレンドの組み合わせ）による
+// 買い時/売り時バッジ。verdictがnull（データ不足）の場合は何も表示しない。
+function GranvilleBadge({ granville, compact = false }) {
+  if (!granville || !granville.verdict) return null;
+
+  const arrowOf = (t) => (t === "up" ? "↗" : t === "down" ? "↘" : "→");
+  const verdictInfo = {
+    buy: { label: "買い", cls: "granville--buy", icon: "🟢" },
+    sell: { label: "売り", cls: "granville--sell", icon: "🔴" },
+    hold: { label: "様子見", cls: "granville--hold", icon: "⚪" },
+  }[granville.verdict];
+
+  if (!verdictInfo) return null;
+
+  return (
+    <div className={`granville ${verdictInfo.cls} ${compact ? "granville--compact" : ""}`}>
+      <span className="granville__arrows mono">
+        {arrowOf(granville.trend90)}
+        {arrowOf(granville.trend30)}
+        {arrowOf(granville.trendDaily)}
+      </span>
+      <span className="granville__label">
+        {verdictInfo.icon} {verdictInfo.label}
+      </span>
+    </div>
+  );
+}
+
 function StockCard({ stock, onOpen }) {
-  const { signal } = stock;
-  const bottomIdxGlobal =
-    signal.bottom.isBottom || signal.bottom.minIdx !== undefined
-      ? stock.prices.length - 14 + signal.bottom.minIdx
-      : null;
+  const { signal, granville } = stock;
+  // min_idxはバックエンド側で、30日移動平均線の配列全体における
+  // 絶対インデックスとして計算済みなので、そのまま使える。
+  const bottomIdxGlobal = signal.bottom.isBottom ? signal.bottom.minIdx : null;
 
   return (
     <button className="stock-card" onClick={() => onOpen(stock)}>
@@ -270,14 +391,20 @@ function StockCard({ stock, onOpen }) {
             {stock.code} ・ {stock.sector}
           </div>
         </div>
-        <VerdictBadge verdict={signal.verdict} />
+        <div className="stock-card__badges">
+          <VerdictBadge verdict={signal.verdict} />
+          <GranvilleBadge granville={granville} compact />
+        </div>
       </div>
 
       <div className="stock-card__body">
         <Sparkline
           prices={stock.prices}
           dates={stock.dates}
+          sma30={stock.sma30}
+          sma90={stock.sma90}
           highlightIdx={signal.bottom.isBottom ? bottomIdxGlobal : null}
+          granvilleVerdict={granville ? granville.verdict : null}
         />
         <div className="stock-card__stats">
           <div className="stat">
@@ -310,7 +437,11 @@ function StockCard({ stock, onOpen }) {
 
 function DetailModal({ stock, onClose }) {
   if (!stock) return null;
-  const { signal } = stock;
+  const { signal, granville } = stock;
+
+  const arrowLabel = (t) =>
+    t === "up" ? "↗ 上昇" : t === "down" ? "↘ 下降" : t === "flat" ? "→ 横ばい" : "―";
+
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
@@ -330,15 +461,28 @@ function DetailModal({ stock, onClose }) {
           <Sparkline
             prices={stock.prices}
             dates={stock.dates}
-            highlightIdx={
-              signal.bottom.isBottom
-                ? stock.prices.length - 14 + signal.bottom.minIdx
-                : null
-            }
+            sma30={stock.sma30}
+            sma90={stock.sma90}
+            highlightIdx={signal.bottom.isBottom ? signal.bottom.minIdx : null}
+            granvilleVerdict={granville ? granville.verdict : null}
             width={320}
             height={130}
             showAxis
           />
+          <div className="modal__legend">
+            <span className="modal__legend-item">
+              <span className="modal__legend-swatch modal__legend-swatch--price" />
+              株価
+            </span>
+            <span className="modal__legend-item">
+              <span className="modal__legend-swatch modal__legend-swatch--sma30" />
+              30日移動平均線
+            </span>
+            <span className="modal__legend-item">
+              <span className="modal__legend-swatch modal__legend-swatch--sma90" />
+              90日移動平均線
+            </span>
+          </div>
           <div className="modal__price-row">
             <span className="mono modal__price">¥{stock.latestPrice.toLocaleString()}</span>
             <VerdictBadge verdict={signal.verdict} />
@@ -351,7 +495,7 @@ function DetailModal({ stock, onClose }) {
         </div>
 
         <div className="modal__section">
-          <div className="modal__section-title">長期トレンド判定</div>
+          <div className="modal__section-title">長期トレンド判定（期間変化率）</div>
           <div className="modal__trend-grid">
             <TrendChip label="30日" value={signal.trends.d30} />
             <TrendChip label="60日" value={signal.trends.d60} />
@@ -362,11 +506,40 @@ function DetailModal({ stock, onClose }) {
         </div>
 
         <div className="modal__section">
+          <div className="modal__section-title">グランビルの法則による買い時/売り時判定</div>
+          {granville && granville.verdict ? (
+            <>
+              <GranvilleBadge granville={granville} />
+              <div className="granville__detail-grid">
+                <div className="granville__detail-item">
+                  <span className="granville__detail-label">長期（90日線）</span>
+                  <span className="granville__detail-value">{arrowLabel(granville.trend90)}</span>
+                </div>
+                <div className="granville__detail-item">
+                  <span className="granville__detail-label">中期（30日線）</span>
+                  <span className="granville__detail-value">{arrowLabel(granville.trend30)}</span>
+                </div>
+                <div className="granville__detail-item">
+                  <span className="granville__detail-label">短期（日次）</span>
+                  <span className="granville__detail-value">{arrowLabel(granville.trendDaily)}</span>
+                </div>
+              </div>
+              <p className="modal__explain">
+                長期・中期・短期それぞれの株価の向きの組み合わせから判定しています。
+                グラフ右端の点が緑なら「買い時」、赤なら「売り時」のシグナルです。
+              </p>
+            </>
+          ) : (
+            <p className="modal__explain">データがまだ十分に揃っていないため、判定できません。</p>
+          )}
+        </div>
+
+        <div className="modal__section">
           <div className="modal__section-title">底値（極小値）判定</div>
           <p className="modal__explain">
             {signal.bottom.isBottom
-              ? `直近${signal.bottom.daysSinceMin}日前に株価の底（一階微分が下降から上昇に転換し、曲線が下に凸）を検知しました。反発の初期段階の可能性があります。`
-              : "直近では株価の極小値（底値）は検出されていません。下降トレンドが継続しているか、すでに反発が進行している状態です。"}
+              ? `直近${signal.bottom.daysSinceMin}日前に、30日移動平均線が底（下降から上昇に転換し、下に凸）を迎えたことを検知しました。日々の細かな値動きではなく、ならした移動平均線で判定しているため、一時的な急落・急騰による誤検知が起きにくくなっています。反発の初期段階の可能性があります。`
+              : "直近では30日移動平均線の極小値（底値）は検出されていません。下降トレンドが継続しているか、すでに反発が進行している状態です。"}
           </p>
         </div>
 
@@ -751,6 +924,13 @@ const STYLES = `
   gap: 8px;
 }
 
+.stock-card__badges {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
 .stock-card__name { font-size: 15px; font-weight: 600; }
 .stock-card__meta { font-size: 11.5px; color: var(--text-dim); margin-top: 2px; }
 
@@ -855,6 +1035,58 @@ const STYLES = `
 .badge--watch { background: rgba(240,168,87,0.16); color: var(--amber); }
 .badge--neutral { background: rgba(138,154,168,0.14); color: var(--text-dim); }
 .badge--high { background: rgba(232,93,93,0.16); color: var(--red); }
+
+.granville {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 5px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.granville--compact {
+  font-size: 10.5px;
+  padding: 4px 8px;
+}
+
+.granville__arrows {
+  letter-spacing: 1px;
+  opacity: 0.85;
+}
+
+.granville--buy { background: rgba(61,220,132,0.16); color: #3DDC84; }
+.granville--sell { background: rgba(232,93,93,0.16); color: var(--red); }
+.granville--hold { background: rgba(138,154,168,0.14); color: var(--text-dim); }
+
+.granville__detail-grid {
+  display: flex;
+  gap: 10px;
+  margin: 10px 0;
+  flex-wrap: wrap;
+}
+
+.granville__detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 8px;
+  padding: 6px 10px;
+  min-width: 90px;
+}
+
+.granville__detail-label {
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
+.granville__detail-value {
+  font-size: 12.5px;
+  font-weight: 600;
+}
 
 .empty-state {
   grid-column: 1 / -1;
@@ -1002,6 +1234,50 @@ const STYLES = `
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
+}
+
+.modal__legend {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+
+.modal__legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.modal__legend-swatch {
+  width: 14px;
+  height: 2px;
+  border-radius: 1px;
+}
+
+.modal__legend-swatch--price {
+  background: var(--teal);
+}
+
+.modal__legend-swatch--sma30 {
+  background: repeating-linear-gradient(
+    90deg,
+    var(--amber) 0px,
+    var(--amber) 3px,
+    transparent 3px,
+    transparent 5px
+  );
+}
+
+.modal__legend-swatch--sma90 {
+  background: repeating-linear-gradient(
+    90deg,
+    #7c9cff 0px,
+    #7c9cff 4px,
+    transparent 4px,
+    transparent 7px
+  );
 }
 
 .modal__explain {
