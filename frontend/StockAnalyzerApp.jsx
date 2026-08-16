@@ -40,21 +40,6 @@ function normalizeStock(raw) {
     sma30: raw.sma30 || null,
     sma90: raw.sma90 || null,
     granvilleSignals: raw.granvilleSignals || null,
-    backtest: raw.backtest
-      ? {
-          status: raw.backtest.status,
-          position: raw.backtest.position,
-          avgPrice: raw.backtest.avgPrice,
-          latestPrice: raw.backtest.latestPrice,
-          realizedPnl: raw.backtest.realizedPnl,
-          unrealizedPnl: raw.backtest.unrealizedPnl,
-          totalPnl: raw.backtest.totalPnl,
-          buyCount: raw.backtest.buyCount,
-          sellCount: raw.backtest.sellCount,
-          firstTradeDate: raw.backtest.firstTradeDate,
-          lastTradeDate: raw.backtest.lastTradeDate,
-        }
-      : null,
     latestPrice: raw.latestPrice,
     dividendYield: raw.dividendYield,
     signal: {
@@ -368,13 +353,12 @@ function VerdictBadge({ verdict }) {
   return <span className={`badge ${map[verdict] || "badge--neutral"}`}>{verdict}</span>;
 }
 
-// 期間内の「買い」「売り」シグナル件数を示す小さなインジケーター。
-// 1件もない場合は何も表示しない。
-function GranvilleSummary({ granvilleSignals, days = 180 }) {
+// 銘柄全体の「買い」「売り」シグナル件数（それぞれ最大5件）を示す
+// 小さなインジケーター。1件もない場合は何も表示しない。
+function GranvilleSummary({ granvilleSignals }) {
   if (!granvilleSignals) return null;
-  const recent = granvilleSignals.slice(-days);
-  const buyCount = recent.filter((s) => s === "buy").length;
-  const sellCount = recent.filter((s) => s === "sell").length;
+  const buyCount = granvilleSignals.filter((s) => s === "buy").length;
+  const sellCount = granvilleSignals.filter((s) => s === "sell").length;
   if (buyCount === 0 && sellCount === 0) return null;
 
   return (
@@ -455,71 +439,15 @@ function StockCard({ stock, onOpen }) {
 
 // 「買いシグナルの日に1株買い、売りシグナルの日に1株売っていたら
 // 最新日時点でどうなっているか」のバックテスト結果を表示するセクション。
-function BacktestSection({ backtest }) {
-  if (!backtest || (backtest.buyCount === 0 && backtest.sellCount === 0)) {
-    return (
-      <div className="modal__section">
-        <div className="modal__section-title">
-          もしシグナル通りに売買していたら（1株ずつ）
-        </div>
-        <p className="modal__explain">
-          この期間中に買い/売りシグナルが一度も出ていないため、シミュレーションできません。
-        </p>
-      </div>
-    );
-  }
-
-  const { status, position, avgPrice, totalPnl, realizedPnl, unrealizedPnl, buyCount, sellCount } =
-    backtest;
-
-  const pnlColor = totalPnl > 0 ? "#3DDC84" : totalPnl < 0 ? "#E85D5D" : "var(--text-dim)";
-  const pnlSign = totalPnl > 0 ? "+" : "";
-
-  let statusLine;
-  if (status === "holding") {
-    statusLine = `現在 ${position}株を保有中（平均取得単価 ¥${avgPrice.toLocaleString()}）。直近の売りシグナルが出現していないため、この株数を持ち続けている状態です。`;
-  } else if (status === "shorting") {
-    statusLine = `現在 ${Math.abs(position)}株を空売り中（平均売却単価 ¥${avgPrice.toLocaleString()}）。買いシグナルより先に売りシグナルが出たため、株を借りて売った状態のまま買い戻せていません。`;
-  } else {
-    statusLine = "買いと売りがちょうど相殺され、現在は保有株数0（ポジションなし）の状態です。";
-  }
-
-  return (
-    <div className="modal__section">
-      <div className="modal__section-title">
-        もしシグナル通りに売買していたら（1株ずつ）
-      </div>
-      <div className="backtest">
-        <div className="backtest__pnl-row">
-          <span className="backtest__pnl-label">損益合計</span>
-          <span className="backtest__pnl-value mono" style={{ color: pnlColor }}>
-            {pnlSign}¥{totalPnl.toLocaleString()}
-          </span>
-        </div>
-        <div className="backtest__breakdown">
-          <span>確定損益 {realizedPnl >= 0 ? "+" : ""}¥{realizedPnl.toLocaleString()}</span>
-          <span>含み損益 {unrealizedPnl >= 0 ? "+" : ""}¥{unrealizedPnl.toLocaleString()}</span>
-        </div>
-        <p className="modal__explain">{statusLine}</p>
-        <p className="backtest__note">
-          買いシグナル{buyCount}回・売りシグナル{sellCount}回を、出現した順に1株ずつ
-          売買したと仮定した場合の結果です（実際の取引手数料・税金は考慮していません）。
-        </p>
-      </div>
-    </div>
-  );
-}
-
 function DetailModal({ stock, onClose }) {
   if (!stock) return null;
   const { signal, granvilleSignals } = stock;
 
-  // グラフ表示期間（最大180日）内での買い/売りシグナル件数を集計
-  const n = stock.prices.length;
-  const windowLen = Math.min(180, n);
-  const recentSignals = granvilleSignals ? granvilleSignals.slice(n - windowLen) : [];
-  const buyCount = recentSignals.filter((s) => s === "buy").length;
-  const sellCount = recentSignals.filter((s) => s === "sell").length;
+  // granvilleSignalsはバックエンド側ですでに「買い/売りそれぞれ最大5日」に
+  // 絞り込み済み（候補が5日未満ならその件数のまま）なので、
+  // 単純に配列全体をカウントすればよい
+  const buyCount = granvilleSignals ? granvilleSignals.filter((s) => s === "buy").length : 0;
+  const sellCount = granvilleSignals ? granvilleSignals.filter((s) => s === "sell").length : 0;
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
@@ -607,21 +535,19 @@ function DetailModal({ stock, onClose }) {
                 </div>
               </div>
               <p className="modal__explain">
-                表示中の直近{windowLen}日間で、90日線（長期）・30日線（中期）・
-                日々の株価（短期）の向きの組み合わせが判定基準に明確に一致した日を
+                この銘柄の全期間の中で、判定基準に一致した候補日のうち
+                「シグナルの強さスコア」が高い順に、買い・売りそれぞれ最大5日を
                 グラフ上に緑（買い）・赤（売り）の点で示しています。
-                あいまいな組み合わせの日は無理に判定せず、マークしていません。
+                現在の表示期間（最大180日）の外にある場合は、グラフには映りません。
               </p>
             </>
           ) : (
             <p className="modal__explain">
-              表示中の期間内には、判定基準に明確に一致する買い/売りシグナルの日は
-              ありませんでした。
+              この銘柄では、判定基準に一致する候補日が見つからなかったため、
+              シグナリングを行っていません。
             </p>
           )}
         </div>
-
-        <BacktestSection backtest={stock.backtest} />
 
         <div className="modal__section">
           <div className="modal__section-title">底値（極小値）判定</div>
@@ -683,62 +609,92 @@ function GranvilleExplainerSample() {
 
   return (
     <div className="explainer">
-      <div className="explainer__text">
-        <h2 className="explainer__title">🟢🔴 買い時/売り時シグナルの見方</h2>
-        <p className="explainer__body">
-          各銘柄のグラフには、<strong>90日移動平均線（長期・青の点線）</strong>・
-          <strong>30日移動平均線（中期・アンバーの点線）</strong>・
-          <strong>日々の株価（短期・ティール色の実線）</strong>の3本の向き
-          （上昇/横ばい/下降）の組み合わせを、日ごとにチェックしています。
-        </p>
-        <p className="explainer__body">
-          グランビルの法則を参考にした判定表に、その組み合わせが明確に
-          一致した日だけを「買いシグナル（🟢緑の点）」「売りシグナル
-          （🔴赤の点）」としてグラフ上にマークします。あいまいな組み合わせの
-          日は無理に判定せず、何もマークしません。
-        </p>
-        <p className="explainer__body explainer__body--sub">
-          各銘柄の詳細画面では、「もしこのシグナル通りに1株ずつ売買していたら、
-          今どうなっているか」の損益シミュレーションも確認できます。
-        </p>
+      <div className="explainer__top">
+        <div className="explainer__text">
+          <h2 className="explainer__title">🟢🔴 買い時/売り時シグナルの見方</h2>
+          <p className="explainer__body">
+            各銘柄について、<strong>90日移動平均線（長期・青の点線）</strong>・
+            <strong>30日移動平均線（中期・アンバーの点線）</strong>・
+            <strong>日々の株価（短期・ティール色の実線）</strong>の3本が、
+            それぞれ「上昇↗／横ばい→／下降↘」のどちらを向いているかを
+            日ごとにチェックしています。
+          </p>
+          <p className="explainer__body">
+            この3方向の組み合わせ（3×3×3＝27通り）のうち、グランビルの法則を
+            参考にした判定表に一致する<strong>15パターン</strong>
+            （買いパターン7通り・売りパターン8通り）だけを候補とします。
+            表にない残り12通りのあいまいな組み合わせは、無理に判定せず
+            候補にも入れません。
+          </p>
+        </div>
+
+        <div className="explainer__sample">
+          <svg viewBox="0 0 300 90" className="explainer__svg">
+            <path d={sma90Path} fill="none" stroke="#7C9CFF" strokeWidth="1.6" strokeDasharray="6,3" opacity="0.8" />
+            <path d={sma30Path} fill="none" stroke="#F0A857" strokeWidth="1.6" strokeDasharray="3,2" opacity="0.85" />
+            <path d={pricePath} fill="none" stroke="#4FD1C5" strokeWidth="2" />
+
+            <circle cx="100" cy="52" r="4" fill="#3DDC84" stroke="#0B0F14" strokeWidth="0.8" />
+            <circle cx="180" cy="36" r="4" fill="#3DDC84" stroke="#0B0F14" strokeWidth="0.8" />
+            <circle cx="60" cy="60" r="4" fill="#E85D5D" stroke="#0B0F14" strokeWidth="0.8" />
+            <circle cx="140" cy="44" r="4" fill="#E85D5D" stroke="#0B0F14" strokeWidth="0.8" />
+          </svg>
+          <div className="explainer__sample-legend">
+            <span className="explainer__legend-item">
+              <span className="modal__legend-swatch modal__legend-swatch--price" />
+              株価
+            </span>
+            <span className="explainer__legend-item">
+              <span className="modal__legend-swatch modal__legend-swatch--sma30" />
+              30日線
+            </span>
+            <span className="explainer__legend-item">
+              <span className="modal__legend-swatch modal__legend-swatch--sma90" />
+              90日線
+            </span>
+            <span className="explainer__legend-item">
+              <span className="modal__legend-dot modal__legend-dot--buy" />
+              買い
+            </span>
+            <span className="explainer__legend-item">
+              <span className="modal__legend-dot modal__legend-dot--sell" />
+              売り
+            </span>
+          </div>
+          <p className="explainer__sample-caption">
+            ※ 上図は説明用のサンプルです。実際のグラフとは異なります。
+          </p>
+        </div>
       </div>
 
-      <div className="explainer__sample">
-        <svg viewBox="0 0 300 90" className="explainer__svg">
-          <path d={sma90Path} fill="none" stroke="#7C9CFF" strokeWidth="1.6" strokeDasharray="6,3" opacity="0.8" />
-          <path d={sma30Path} fill="none" stroke="#F0A857" strokeWidth="1.6" strokeDasharray="3,2" opacity="0.85" />
-          <path d={pricePath} fill="none" stroke="#4FD1C5" strokeWidth="2" />
-
-          <circle cx="100" cy="52" r="4" fill="#3DDC84" stroke="#0B0F14" strokeWidth="0.8" />
-          <circle cx="180" cy="36" r="4" fill="#3DDC84" stroke="#0B0F14" strokeWidth="0.8" />
-          <circle cx="60" cy="60" r="4" fill="#E85D5D" stroke="#0B0F14" strokeWidth="0.8" />
-          <circle cx="140" cy="44" r="4" fill="#E85D5D" stroke="#0B0F14" strokeWidth="0.8" />
-        </svg>
-        <div className="explainer__sample-legend">
-          <span className="explainer__legend-item">
-            <span className="modal__legend-swatch modal__legend-swatch--price" />
-            株価
-          </span>
-          <span className="explainer__legend-item">
-            <span className="modal__legend-swatch modal__legend-swatch--sma30" />
-            30日線
-          </span>
-          <span className="explainer__legend-item">
-            <span className="modal__legend-swatch modal__legend-swatch--sma90" />
-            90日線
-          </span>
-          <span className="explainer__legend-item">
-            <span className="modal__legend-dot modal__legend-dot--buy" />
-            買い
-          </span>
-          <span className="explainer__legend-item">
-            <span className="modal__legend-dot modal__legend-dot--sell" />
-            売り
-          </span>
+      <div className="explainer__detail-grid">
+        <div className="explainer__detail-card">
+          <div className="explainer__detail-card-title">① 何パターンで判定しているか</div>
+          <p className="explainer__detail-card-body">
+            長期・中期・短期それぞれ3方向（上昇/横ばい/下降）の組み合わせ
+            27通りのうち、あらかじめ指定された<strong>15パターン</strong>
+            （買い時7パターン・売り時8パターン）だけを判定に使っています。
+            残り12パターンは、根拠があいまいなため判定対象に含めていません。
+          </p>
         </div>
-        <p className="explainer__sample-caption">
-          ※ 上図は説明用のサンプルです。実際のグラフとは異なります。
-        </p>
+        <div className="explainer__detail-card">
+          <div className="explainer__detail-card-title">② スコアはどう算出されるか</div>
+          <p className="explainer__detail-card-body">
+            上記15パターンに一致した日について、<strong>長期・中期・短期
+            それぞれの変化率(%)の絶対値を合計</strong>した値を
+            「シグナルの強さスコア」とします。3つの時間軸すべてで
+            値動きがはっきりしている日ほど、スコアが高くなります。
+          </p>
+        </div>
+        <div className="explainer__detail-card">
+          <div className="explainer__detail-card-title">③ どの基準でシグナリングされるか</div>
+          <p className="explainer__detail-card-body">
+            銘柄ごとに、買い候補・売り候補それぞれをスコアが高い順に並べ、
+            <strong>最大5日まで</strong>を実際のシグナルとして表示します。
+            候補が5日に満たない場合は、無理に5日へ水増しせず、
+            <strong>実際にある件数（0〜4日）だけ</strong>をそのまま表示します。
+          </p>
+        </div>
       </div>
     </div>
   );
@@ -978,8 +934,14 @@ const STYLES = `
   gap: 16px;
 }
 
+.explainer__top {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
 @media (min-width: 640px) {
-  .explainer {
+  .explainer__top {
     flex-direction: row;
     align-items: center;
   }
@@ -1036,6 +998,40 @@ const STYLES = `
 
 .explainer__sample-caption {
   font-size: 10px;
+  color: var(--text-dim);
+  margin: 0;
+}
+
+.explainer__detail-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--card-border);
+}
+
+@media (min-width: 640px) {
+  .explainer__detail-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.explainer__detail-card {
+  background: rgba(255,255,255,0.03);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.explainer__detail-card-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--teal);
+  margin-bottom: 6px;
+}
+
+.explainer__detail-card-body {
+  font-size: 11.5px;
+  line-height: 1.6;
   color: var(--text-dim);
   margin: 0;
 }
@@ -1317,44 +1313,6 @@ const STYLES = `
 .granville__detail-value {
   font-size: 12.5px;
   font-weight: 600;
-}
-
-.backtest {
-  background: rgba(255,255,255,0.03);
-  border-radius: 10px;
-  padding: 12px;
-}
-
-.backtest__pnl-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 6px;
-}
-
-.backtest__pnl-label {
-  font-size: 12px;
-  color: var(--text-dim);
-}
-
-.backtest__pnl-value {
-  font-size: 20px;
-  font-weight: 700;
-}
-
-.backtest__breakdown {
-  display: flex;
-  gap: 14px;
-  font-size: 11px;
-  color: var(--text-dim);
-  margin-bottom: 10px;
-}
-
-.backtest__note {
-  font-size: 10.5px;
-  color: var(--text-dim);
-  margin: 8px 0 0;
-  line-height: 1.5;
 }
 
 .empty-state {
