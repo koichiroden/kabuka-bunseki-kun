@@ -39,12 +39,20 @@ function normalizeStock(raw) {
     prices: raw.prices,
     sma30: raw.sma30 || null,
     sma90: raw.sma90 || null,
-    granville: raw.granville
+    granvilleSignals: raw.granvilleSignals || null,
+    backtest: raw.backtest
       ? {
-          trend90: raw.granville.trend90,
-          trend30: raw.granville.trend30,
-          trendDaily: raw.granville.trendDaily,
-          verdict: raw.granville.verdict,
+          status: raw.backtest.status,
+          position: raw.backtest.position,
+          avgPrice: raw.backtest.avgPrice,
+          latestPrice: raw.backtest.latestPrice,
+          realizedPnl: raw.backtest.realizedPnl,
+          unrealizedPnl: raw.backtest.unrealizedPnl,
+          totalPnl: raw.backtest.totalPnl,
+          buyCount: raw.backtest.buyCount,
+          sellCount: raw.backtest.sellCount,
+          firstTradeDate: raw.backtest.firstTradeDate,
+          lastTradeDate: raw.backtest.lastTradeDate,
         }
       : null,
     latestPrice: raw.latestPrice,
@@ -120,7 +128,7 @@ function Sparkline({
   sma30,
   sma90,
   highlightIdx,
-  granvilleVerdict,
+  granvilleSignals,
   width = 220,
   height = 56,
   showAxis = false,
@@ -181,10 +189,16 @@ function Sparkline({
     }
   }
 
-  // 現在の「買い時/売り時」シグナル点：グラフの一番右（最新日）に表示する
-  const latestPoint = pts.length > 0 ? pts[pts.length - 1] : null;
-  const signalColor =
-    granvilleVerdict === "buy" ? "#3DDC84" : granvilleVerdict === "sell" ? "#E85D5D" : null;
+  // 期間内で「買い」「売り」と明確に判定された日を、それぞれの座標で保持する
+  const granvilleSlice = granvilleSignals ? granvilleSignals.slice(offset) : null;
+  const buyMarkers = [];
+  const sellMarkers = [];
+  if (granvilleSlice) {
+    granvilleSlice.forEach((sig, i) => {
+      if (sig === "buy") buyMarkers.push(pts[i]);
+      else if (sig === "sell") sellMarkers.push(pts[i]);
+    });
+  }
 
   const [hoverIdx, setHoverIdx] = React.useState(null);
 
@@ -267,23 +281,29 @@ function Sparkline({
           </>
         )}
 
-        {latestPoint && signalColor && (
-          <>
-            <circle
-              cx={latestPoint[0]}
-              cy={latestPoint[1]}
-              r="6"
-              fill="none"
-              stroke={signalColor}
-              strokeWidth="1.6"
-              opacity="0.7"
-            >
-              <animate attributeName="r" values="4;9;4" dur="1.6s" repeatCount="indefinite" />
-              <animate attributeName="opacity" values="0.8;0.05;0.8" dur="1.6s" repeatCount="indefinite" />
-            </circle>
-            <circle cx={latestPoint[0]} cy={latestPoint[1]} r="3.4" fill={signalColor} />
-          </>
-        )}
+        {buyMarkers.map(([x, y], i) => (
+          <circle
+            key={`buy-${i}`}
+            cx={x}
+            cy={y}
+            r="2.6"
+            fill="#3DDC84"
+            stroke="#0B0F14"
+            strokeWidth="0.6"
+          />
+        ))}
+
+        {sellMarkers.map(([x, y], i) => (
+          <circle
+            key={`sell-${i}`}
+            cx={x}
+            cy={y}
+            r="2.6"
+            fill="#E85D5D"
+            stroke="#0B0F14"
+            strokeWidth="0.6"
+          />
+        ))}
 
         {showAxis &&
           axisLabels.map((a, i) => (
@@ -348,36 +368,33 @@ function VerdictBadge({ verdict }) {
   return <span className={`badge ${map[verdict] || "badge--neutral"}`}>{verdict}</span>;
 }
 
-// グランビルの法則（90日・30日・日次トレンドの組み合わせ）による
-// 買い時/売り時バッジ。verdictがnull（データ不足）の場合は何も表示しない。
-function GranvilleBadge({ granville, compact = false }) {
-  if (!granville || !granville.verdict) return null;
-
-  const arrowOf = (t) => (t === "up" ? "↗" : t === "down" ? "↘" : "→");
-  const verdictInfo = {
-    buy: { label: "買い", cls: "granville--buy", icon: "🟢" },
-    sell: { label: "売り", cls: "granville--sell", icon: "🔴" },
-    hold: { label: "様子見", cls: "granville--hold", icon: "⚪" },
-  }[granville.verdict];
-
-  if (!verdictInfo) return null;
+// 期間内の「買い」「売り」シグナル件数を示す小さなインジケーター。
+// 1件もない場合は何も表示しない。
+function GranvilleSummary({ granvilleSignals, days = 180 }) {
+  if (!granvilleSignals) return null;
+  const recent = granvilleSignals.slice(-days);
+  const buyCount = recent.filter((s) => s === "buy").length;
+  const sellCount = recent.filter((s) => s === "sell").length;
+  if (buyCount === 0 && sellCount === 0) return null;
 
   return (
-    <div className={`granville ${verdictInfo.cls} ${compact ? "granville--compact" : ""}`}>
-      <span className="granville__arrows mono">
-        {arrowOf(granville.trend90)}
-        {arrowOf(granville.trend30)}
-        {arrowOf(granville.trendDaily)}
-      </span>
-      <span className="granville__label">
-        {verdictInfo.icon} {verdictInfo.label}
-      </span>
+    <div className="granville-summary">
+      {buyCount > 0 && (
+        <span className="granville-summary__item granville-summary__item--buy">
+          🟢 買い×{buyCount}
+        </span>
+      )}
+      {sellCount > 0 && (
+        <span className="granville-summary__item granville-summary__item--sell">
+          🔴 売り×{sellCount}
+        </span>
+      )}
     </div>
   );
 }
 
 function StockCard({ stock, onOpen }) {
-  const { signal, granville } = stock;
+  const { signal, granvilleSignals } = stock;
   // min_idxはバックエンド側で、30日移動平均線の配列全体における
   // 絶対インデックスとして計算済みなので、そのまま使える。
   const bottomIdxGlobal = signal.bottom.isBottom ? signal.bottom.minIdx : null;
@@ -393,7 +410,6 @@ function StockCard({ stock, onOpen }) {
         </div>
         <div className="stock-card__badges">
           <VerdictBadge verdict={signal.verdict} />
-          <GranvilleBadge granville={granville} compact />
         </div>
       </div>
 
@@ -404,7 +420,7 @@ function StockCard({ stock, onOpen }) {
           sma30={stock.sma30}
           sma90={stock.sma90}
           highlightIdx={signal.bottom.isBottom ? bottomIdxGlobal : null}
-          granvilleVerdict={granville ? granville.verdict : null}
+          granvilleSignals={granvilleSignals}
         />
         <div className="stock-card__stats">
           <div className="stat">
@@ -417,6 +433,8 @@ function StockCard({ stock, onOpen }) {
           </div>
         </div>
       </div>
+
+      <GranvilleSummary granvilleSignals={granvilleSignals} />
 
       <div className="stock-card__trends">
         <TrendChip label="30日" value={signal.trends.d30} />
@@ -435,12 +453,73 @@ function StockCard({ stock, onOpen }) {
   );
 }
 
+// 「買いシグナルの日に1株買い、売りシグナルの日に1株売っていたら
+// 最新日時点でどうなっているか」のバックテスト結果を表示するセクション。
+function BacktestSection({ backtest }) {
+  if (!backtest || (backtest.buyCount === 0 && backtest.sellCount === 0)) {
+    return (
+      <div className="modal__section">
+        <div className="modal__section-title">
+          もしシグナル通りに売買していたら（1株ずつ）
+        </div>
+        <p className="modal__explain">
+          この期間中に買い/売りシグナルが一度も出ていないため、シミュレーションできません。
+        </p>
+      </div>
+    );
+  }
+
+  const { status, position, avgPrice, totalPnl, realizedPnl, unrealizedPnl, buyCount, sellCount } =
+    backtest;
+
+  const pnlColor = totalPnl > 0 ? "#3DDC84" : totalPnl < 0 ? "#E85D5D" : "var(--text-dim)";
+  const pnlSign = totalPnl > 0 ? "+" : "";
+
+  let statusLine;
+  if (status === "holding") {
+    statusLine = `現在 ${position}株を保有中（平均取得単価 ¥${avgPrice.toLocaleString()}）。直近の売りシグナルが出現していないため、この株数を持ち続けている状態です。`;
+  } else if (status === "shorting") {
+    statusLine = `現在 ${Math.abs(position)}株を空売り中（平均売却単価 ¥${avgPrice.toLocaleString()}）。買いシグナルより先に売りシグナルが出たため、株を借りて売った状態のまま買い戻せていません。`;
+  } else {
+    statusLine = "買いと売りがちょうど相殺され、現在は保有株数0（ポジションなし）の状態です。";
+  }
+
+  return (
+    <div className="modal__section">
+      <div className="modal__section-title">
+        もしシグナル通りに売買していたら（1株ずつ）
+      </div>
+      <div className="backtest">
+        <div className="backtest__pnl-row">
+          <span className="backtest__pnl-label">損益合計</span>
+          <span className="backtest__pnl-value mono" style={{ color: pnlColor }}>
+            {pnlSign}¥{totalPnl.toLocaleString()}
+          </span>
+        </div>
+        <div className="backtest__breakdown">
+          <span>確定損益 {realizedPnl >= 0 ? "+" : ""}¥{realizedPnl.toLocaleString()}</span>
+          <span>含み損益 {unrealizedPnl >= 0 ? "+" : ""}¥{unrealizedPnl.toLocaleString()}</span>
+        </div>
+        <p className="modal__explain">{statusLine}</p>
+        <p className="backtest__note">
+          買いシグナル{buyCount}回・売りシグナル{sellCount}回を、出現した順に1株ずつ
+          売買したと仮定した場合の結果です（実際の取引手数料・税金は考慮していません）。
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function DetailModal({ stock, onClose }) {
   if (!stock) return null;
-  const { signal, granville } = stock;
+  const { signal, granvilleSignals } = stock;
 
-  const arrowLabel = (t) =>
-    t === "up" ? "↗ 上昇" : t === "down" ? "↘ 下降" : t === "flat" ? "→ 横ばい" : "―";
+  // グラフ表示期間（最大180日）内での買い/売りシグナル件数を集計
+  const n = stock.prices.length;
+  const windowLen = Math.min(180, n);
+  const recentSignals = granvilleSignals ? granvilleSignals.slice(n - windowLen) : [];
+  const buyCount = recentSignals.filter((s) => s === "buy").length;
+  const sellCount = recentSignals.filter((s) => s === "sell").length;
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
@@ -464,7 +543,7 @@ function DetailModal({ stock, onClose }) {
             sma30={stock.sma30}
             sma90={stock.sma90}
             highlightIdx={signal.bottom.isBottom ? signal.bottom.minIdx : null}
-            granvilleVerdict={granville ? granville.verdict : null}
+            granvilleSignals={granvilleSignals}
             width={320}
             height={130}
             showAxis
@@ -481,6 +560,14 @@ function DetailModal({ stock, onClose }) {
             <span className="modal__legend-item">
               <span className="modal__legend-swatch modal__legend-swatch--sma90" />
               90日移動平均線
+            </span>
+            <span className="modal__legend-item">
+              <span className="modal__legend-dot modal__legend-dot--buy" />
+              買いシグナル
+            </span>
+            <span className="modal__legend-item">
+              <span className="modal__legend-dot modal__legend-dot--sell" />
+              売りシグナル
             </span>
           </div>
           <div className="modal__price-row">
@@ -506,33 +593,35 @@ function DetailModal({ stock, onClose }) {
         </div>
 
         <div className="modal__section">
-          <div className="modal__section-title">グランビルの法則による買い時/売り時判定</div>
-          {granville && granville.verdict ? (
+          <div className="modal__section-title">グランビルの法則による買い時/売り時シグナル</div>
+          {buyCount > 0 || sellCount > 0 ? (
             <>
-              <GranvilleBadge granville={granville} />
               <div className="granville__detail-grid">
                 <div className="granville__detail-item">
-                  <span className="granville__detail-label">長期（90日線）</span>
-                  <span className="granville__detail-value">{arrowLabel(granville.trend90)}</span>
+                  <span className="granville__detail-label">🟢 買いシグナル</span>
+                  <span className="granville__detail-value">{buyCount}日</span>
                 </div>
                 <div className="granville__detail-item">
-                  <span className="granville__detail-label">中期（30日線）</span>
-                  <span className="granville__detail-value">{arrowLabel(granville.trend30)}</span>
-                </div>
-                <div className="granville__detail-item">
-                  <span className="granville__detail-label">短期（日次）</span>
-                  <span className="granville__detail-value">{arrowLabel(granville.trendDaily)}</span>
+                  <span className="granville__detail-label">🔴 売りシグナル</span>
+                  <span className="granville__detail-value">{sellCount}日</span>
                 </div>
               </div>
               <p className="modal__explain">
-                長期・中期・短期それぞれの株価の向きの組み合わせから判定しています。
-                グラフ右端の点が緑なら「買い時」、赤なら「売り時」のシグナルです。
+                表示中の直近{windowLen}日間で、90日線（長期）・30日線（中期）・
+                日々の株価（短期）の向きの組み合わせが判定基準に明確に一致した日を
+                グラフ上に緑（買い）・赤（売り）の点で示しています。
+                あいまいな組み合わせの日は無理に判定せず、マークしていません。
               </p>
             </>
           ) : (
-            <p className="modal__explain">データがまだ十分に揃っていないため、判定できません。</p>
+            <p className="modal__explain">
+              表示中の期間内には、判定基準に明確に一致する買い/売りシグナルの日は
+              ありませんでした。
+            </p>
           )}
         </div>
+
+        <BacktestSection backtest={stock.backtest} />
 
         <div className="modal__section">
           <div className="modal__section-title">底値（極小値）判定</div>
@@ -576,6 +665,81 @@ function AlertBanner({ buyList, onJump }) {
       <button className="alert-banner__btn" onClick={onJump}>
         確認する
       </button>
+    </div>
+  );
+}
+
+// サイト最上部に置く、グランビルの法則（買い/売りシグナル）の解説パネル。
+// 実データではなく、説明用に手作りしたサンプルグラフを使う。
+function GranvilleExplainerSample() {
+  // サンプル用の株価っぽい折れ線（実データではなく説明用のダミー座標）
+  const pricePath =
+    "M0,70 L20,66 L40,72 L60,60 L80,64 L100,52 L120,56 L140,44 L160,48 L180,36 " +
+    "L200,40 L220,30 L240,34 L260,24 L280,28 L300,20";
+  const sma30Path =
+    "M20,68 L40,68 L60,66 L80,63 L100,58 L120,54 L140,50 L160,46 L180,42 " +
+    "L200,40 L220,37 L240,34 L260,31 L280,29 L300,26";
+  const sma90Path = "M60,72 L120,66 L180,54 L240,42 L300,32";
+
+  return (
+    <div className="explainer">
+      <div className="explainer__text">
+        <h2 className="explainer__title">🟢🔴 買い時/売り時シグナルの見方</h2>
+        <p className="explainer__body">
+          各銘柄のグラフには、<strong>90日移動平均線（長期・青の点線）</strong>・
+          <strong>30日移動平均線（中期・アンバーの点線）</strong>・
+          <strong>日々の株価（短期・ティール色の実線）</strong>の3本の向き
+          （上昇/横ばい/下降）の組み合わせを、日ごとにチェックしています。
+        </p>
+        <p className="explainer__body">
+          グランビルの法則を参考にした判定表に、その組み合わせが明確に
+          一致した日だけを「買いシグナル（🟢緑の点）」「売りシグナル
+          （🔴赤の点）」としてグラフ上にマークします。あいまいな組み合わせの
+          日は無理に判定せず、何もマークしません。
+        </p>
+        <p className="explainer__body explainer__body--sub">
+          各銘柄の詳細画面では、「もしこのシグナル通りに1株ずつ売買していたら、
+          今どうなっているか」の損益シミュレーションも確認できます。
+        </p>
+      </div>
+
+      <div className="explainer__sample">
+        <svg viewBox="0 0 300 90" className="explainer__svg">
+          <path d={sma90Path} fill="none" stroke="#7C9CFF" strokeWidth="1.6" strokeDasharray="6,3" opacity="0.8" />
+          <path d={sma30Path} fill="none" stroke="#F0A857" strokeWidth="1.6" strokeDasharray="3,2" opacity="0.85" />
+          <path d={pricePath} fill="none" stroke="#4FD1C5" strokeWidth="2" />
+
+          <circle cx="100" cy="52" r="4" fill="#3DDC84" stroke="#0B0F14" strokeWidth="0.8" />
+          <circle cx="180" cy="36" r="4" fill="#3DDC84" stroke="#0B0F14" strokeWidth="0.8" />
+          <circle cx="60" cy="60" r="4" fill="#E85D5D" stroke="#0B0F14" strokeWidth="0.8" />
+          <circle cx="140" cy="44" r="4" fill="#E85D5D" stroke="#0B0F14" strokeWidth="0.8" />
+        </svg>
+        <div className="explainer__sample-legend">
+          <span className="explainer__legend-item">
+            <span className="modal__legend-swatch modal__legend-swatch--price" />
+            株価
+          </span>
+          <span className="explainer__legend-item">
+            <span className="modal__legend-swatch modal__legend-swatch--sma30" />
+            30日線
+          </span>
+          <span className="explainer__legend-item">
+            <span className="modal__legend-swatch modal__legend-swatch--sma90" />
+            90日線
+          </span>
+          <span className="explainer__legend-item">
+            <span className="modal__legend-dot modal__legend-dot--buy" />
+            買い
+          </span>
+          <span className="explainer__legend-item">
+            <span className="modal__legend-dot modal__legend-dot--sell" />
+            売り
+          </span>
+        </div>
+        <p className="explainer__sample-caption">
+          ※ 上図は説明用のサンプルです。実際のグラフとは異なります。
+        </p>
+      </div>
     </div>
   );
 }
@@ -655,6 +819,8 @@ export default function App() {
           </div>
         </div>
       </header>
+
+      <GranvilleExplainerSample />
 
       <AlertBanner
         buyList={buyList}
@@ -799,6 +965,79 @@ const STYLES = `
   margin: 2px 0 0;
   font-size: 12.5px;
   color: var(--text-dim);
+}
+
+.explainer {
+  margin: 16px 16px 0;
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+@media (min-width: 640px) {
+  .explainer {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.explainer__text {
+  flex: 1.2;
+}
+
+.explainer__title {
+  font-size: 15px;
+  margin: 0 0 8px;
+}
+
+.explainer__body {
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: var(--text);
+  margin: 0 0 8px;
+}
+
+.explainer__body--sub {
+  color: var(--text-dim);
+}
+
+.explainer__sample {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.explainer__svg {
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+}
+
+.explainer__sample-legend {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.explainer__legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10.5px;
+  color: var(--text-dim);
+}
+
+.explainer__sample-caption {
+  font-size: 10px;
+  color: var(--text-dim);
+  margin: 0;
 }
 
 .alert-banner {
@@ -1036,30 +1275,22 @@ const STYLES = `
 .badge--neutral { background: rgba(138,154,168,0.14); color: var(--text-dim); }
 .badge--high { background: rgba(232,93,93,0.16); color: var(--red); }
 
-.granville {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11.5px;
-  font-weight: 700;
-  padding: 5px 10px;
+.granville-summary {
+  display: flex;
+  gap: 8px;
+  padding: 0 14px 4px;
+  flex-wrap: wrap;
+}
+
+.granville-summary__item {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
   border-radius: 999px;
-  white-space: nowrap;
 }
 
-.granville--compact {
-  font-size: 10.5px;
-  padding: 4px 8px;
-}
-
-.granville__arrows {
-  letter-spacing: 1px;
-  opacity: 0.85;
-}
-
-.granville--buy { background: rgba(61,220,132,0.16); color: #3DDC84; }
-.granville--sell { background: rgba(232,93,93,0.16); color: var(--red); }
-.granville--hold { background: rgba(138,154,168,0.14); color: var(--text-dim); }
+.granville-summary__item--buy { background: rgba(61,220,132,0.14); color: #3DDC84; }
+.granville-summary__item--sell { background: rgba(232,93,93,0.14); color: var(--red); }
 
 .granville__detail-grid {
   display: flex;
@@ -1086,6 +1317,44 @@ const STYLES = `
 .granville__detail-value {
   font-size: 12.5px;
   font-weight: 600;
+}
+
+.backtest {
+  background: rgba(255,255,255,0.03);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.backtest__pnl-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+
+.backtest__pnl-label {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.backtest__pnl-value {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.backtest__breakdown {
+  display: flex;
+  gap: 14px;
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+}
+
+.backtest__note {
+  font-size: 10.5px;
+  color: var(--text-dim);
+  margin: 8px 0 0;
+  line-height: 1.5;
 }
 
 .empty-state {
@@ -1279,6 +1548,16 @@ const STYLES = `
     transparent 7px
   );
 }
+
+.modal__legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.modal__legend-dot--buy { background: #3DDC84; }
+.modal__legend-dot--sell { background: var(--red); }
 
 .modal__explain {
   font-size: 13px;
