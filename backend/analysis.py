@@ -6,11 +6,14 @@
   移動平均線が下降→上昇に転換し、かつ下に凸になっているタイミングを検出する。
   生の終値は日々のノイズが大きく、底値判定が不安定になりやすいため、
   30日移動平均線というなめらかにした曲線の上で極小値を探す方式にしている。
-- グランビルの法則を参考にした「明確に買い時/売り時だった日」の検出
+- グランビルの法則を参考にした「買い時/売り時スコア」の算出と
+  上位シグナルの抽出
   90日移動平均線（長期）・30日移動平均線（中期）・日々の株価（短期/日次）
   それぞれの向き（上昇/横ばい/下降）の組み合わせが、あらかじめ定義した
-  判定表に一致する日だけを「買い」「売り」として抽出する（あいまいな
-  組み合わせは無理に多数決で判定せず、マークしない）。
+  判定表に一致する日を候補とし、その中から「シグナルの強さスコア」
+  （3つの時間軸の変化率の絶対値の合計）が高い順に、買い・売りそれぞれ
+  上位5日だけを実際のシグナルとして抽出する。候補が5日に満たない銘柄は
+  その方向をシグナリングしない。
 - 総合スコアリング（-100〜100）と判定ラベル
 
 React版(App.jsx)のcomputeSignalと同じ考え方をPythonに移植したもの。
@@ -102,18 +105,19 @@ def detect_local_minimum(sma: List[Optional[float]], lookback: int = 20) -> Dict
     }
 
 
-def trend_direction_series(
+def trend_info_series(
     series: List[Optional[float]], lookback: int, flat_threshold_pct: float = 0.5
-) -> List[Optional[str]]:
+) -> List[Optional[Dict[str, Any]]]:
     """
     seriesの「各時点」について、"その時点の値"と"そこからlookback本前(有効値ベース)の値"
-    を比較し、"up"（↗上昇）/ "flat"（→横ばい）/ "down"（↘下降）を判定する。
+    を比較し、向き（"up"/"flat"/"down"）と、その変化率(%)の両方を求める。
+    変化率はあとで「シグナルの強さ（スコア）」を計算するために使う
+    （変化率の絶対値が大きいほど、その時間軸でのトレンドがはっきりしている、とみなす）。
     Noneが混じっていても、有効な値だけを数えてlookback本前を探す。
-    データが足りない先頭部分はNoneのままになる。
-    seriesと同じ長さのリストを返す。
+    seriesと同じ長さのリストを返す（各要素は {"direction":..., "changePct":...} かNone）。
     """
     n = len(series)
-    result: List[Optional[str]] = [None] * n
+    result: List[Optional[Dict[str, Any]]] = [None] * n
     valid_positions = [i for i, v in enumerate(series) if v is not None]
 
     for pos_in_valid, orig_idx in enumerate(valid_positions):
@@ -126,11 +130,12 @@ def trend_direction_series(
             continue
         change_pct = (cur - past) / past * 100
         if change_pct > flat_threshold_pct:
-            result[orig_idx] = "up"
+            direction = "up"
         elif change_pct < -flat_threshold_pct:
-            result[orig_idx] = "down"
+            direction = "down"
         else:
-            result[orig_idx] = "flat"
+            direction = "flat"
+        result[orig_idx] = {"direction": direction, "changePct": change_pct}
 
     return result
 
@@ -141,11 +146,10 @@ def trend_direction_series(
 # キーは (90日トレンド, 30日トレンド, 日次トレンド) の3つ組。
 #
 # 注意: 3方向 × 3方向 × 3方向 = 27通りの組み合わせのうち、
-# ここに定義されているのは明示的に指定された15通りだけ。
-# 表にない残り12通りの組み合わせの日は「買い」でも「売り」でもない
-# （＝グラフ上には何もマークしない）扱いとする。
+# ここに定義されているのは明示的に指定された15通り（買い7通り・売り8通り）だけ。
+# 表にない残り12通りの組み合わせの日は「買い」でも「売り」でもない扱いとする。
 # あいまいな組み合わせを多数決などで無理に買い/売りに分類しない、というのが
-# 今回の設計方針（「基準に明確にひっかかる日だけを可視化したい」という要望のため）。
+# 今回の設計方針。
 GRANVILLE_TABLE: Dict[tuple, str] = {
     ("up", "up", "up"): "buy",
     ("up", "up", "flat"): "buy",
@@ -164,119 +168,59 @@ GRANVILLE_TABLE: Dict[tuple, str] = {
     ("down", "down", "down"): "sell",
 }
 
+TOP_SIGNAL_COUNT = 5  # 銘柄ごとに、買い/売りそれぞれ上位何日までシグナリングするか
+
 
 def compute_granville_signals(
     prices: List[float], sma30: List[Optional[float]], sma90: List[Optional[float]]
 ) -> List[Optional[str]]:
     """
     株価の全履歴について、日ごとに90日線・30日線・日次の向きの組み合わせを求め、
-    GRANVILLE_TABLE に明確に定義されている「買い」「売り」の日だけを抽出する。
-    表にない組み合わせの日はNone（マークしない）。
+    GRANVILLE_TABLE に明確に定義されている「買い」「売り」の候補日を洗い出したうえで、
+    それぞれの「シグナルの強さスコア」（後述）が高い順に、買い・売りそれぞれ最大
+    TOP_SIGNAL_COUNT件までを実際のシグナルとして残す。
+
+    スコアは「90日線・30日線・日次それぞれの変化率(%)の絶対値の合計」。
+    3つの時間軸すべてで値動きがはっきりしている日ほど、スコアが高くなる
+    （＝より根拠が強い、と考える）。
+
+    候補日がTOP_SIGNAL_COUNT件に満たない場合は、無理に5件に揃えたりはせず、
+    実際に候補として存在する日（0〜4件）だけをそのままシグナルとする。
+    候補が0件なら、その方向は結果としてシグナルなしになる。
+
     pricesと同じ長さのリスト（各要素は "buy" / "sell" / None）を返す。
     """
-    trend90_series = trend_direction_series(sma90, lookback=10)
-    trend30_series = trend_direction_series(sma30, lookback=5)
-    trend_daily_series = trend_direction_series(prices, lookback=2, flat_threshold_pct=0.3)
+    info90 = trend_info_series(sma90, lookback=10)
+    info30 = trend_info_series(sma30, lookback=5)
+    info_daily = trend_info_series(prices, lookback=2, flat_threshold_pct=0.3)
 
     n = len(prices)
-    signals: List[Optional[str]] = [None] * n
+    candidates: Dict[str, List[tuple]] = {"buy": [], "sell": []}  # [(index, score), ...]
+
     for i in range(n):
-        t90, t30, td = trend90_series[i], trend30_series[i], trend_daily_series[i]
-        if t90 is None or t30 is None or td is None:
+        i90, i30, idaily = info90[i], info30[i], info_daily[i]
+        if i90 is None or i30 is None or idaily is None:
             continue
-        key = (t90, t30, td)
-        if key in GRANVILLE_TABLE:
-            signals[i] = GRANVILLE_TABLE[key]
+        key = (i90["direction"], i30["direction"], idaily["direction"])
+        verdict = GRANVILLE_TABLE.get(key)
+        if verdict is None:
+            continue
+        score = abs(i90["changePct"]) + abs(i30["changePct"]) + abs(idaily["changePct"])
+        candidates[verdict].append((i, score))
+
+    signals: List[Optional[str]] = [None] * n
+    for verdict, items in candidates.items():
+        # items.sort + [:TOP_SIGNAL_COUNT] は、候補が5件未満でもそのまま
+        # 全件（0〜4件）を残す。無理に5件へ水増しすることはない。
+        items.sort(key=lambda pair: pair[1], reverse=True)
+        for idx, _score in items[:TOP_SIGNAL_COUNT]:
+            signals[idx] = verdict
 
     return signals
 
 
-def simulate_granville_backtest(
-    prices: List[float], dates: List[str], signals: List[Optional[str]]
-) -> Dict[str, Any]:
-    """
-    「買い」シグナルの日に1株買い、「売り」シグナルの日に1株売っていたら、
-    最新日時点でどうなっているかをシミュレーションする。
-
-    FIFO（先入れ先出し）方式で買いと売りを順番にペアリングする:
-    - 買いシグナルの時点で、未決済の「売り」（空売り）があれば、
-      それを1件決済する（＝空売りの買い戻し）。無ければ新たに1株買って保有する。
-    - 売りシグナルの時点で、未決済の「買い」（保有株）があれば、
-      それを1件決済する（＝保有株の売却）。無ければ新たに1株空売りする。
-
-    最終的に未決済の買い（保有株）や売り（空売り）が残っている場合は、
-    最新日の株価で評価した含み損益も合わせて計算する。
-    """
-    buy_open: List[float] = []   # 未決済の買い建玉（購入価格のリスト）
-    sell_open: List[float] = []  # 未決済の空売り建玉（売却価格のリスト）
-    realized_pnl = 0.0
-    buy_count = 0
-    sell_count = 0
-    first_trade_date: Optional[str] = None
-    last_trade_date: Optional[str] = None
-
-    for i, sig in enumerate(signals):
-        if sig not in ("buy", "sell"):
-            continue
-        price = prices[i]
-        date = dates[i] if i < len(dates) else None
-        if first_trade_date is None:
-            first_trade_date = date
-        last_trade_date = date
-
-        if sig == "buy":
-            buy_count += 1
-            if sell_open:
-                # 空売りしていた分を買い戻して決済（利益 = 売った価格 - 買い戻した価格）
-                sold_price = sell_open.pop(0)
-                realized_pnl += sold_price - price
-            else:
-                buy_open.append(price)
-        else:  # sell
-            sell_count += 1
-            if buy_open:
-                # 保有していた株を売却して決済（利益 = 売った価格 - 買った価格）
-                bought_price = buy_open.pop(0)
-                realized_pnl += price - bought_price
-            else:
-                sell_open.append(price)
-
-    latest_price = prices[-1] if prices else None
-    position = len(buy_open) - len(sell_open)  # 正=保有株数、負=空売り株数
-
-    unrealized_pnl = 0.0
-    avg_price: Optional[float] = None
-    if buy_open:
-        avg_price = sum(buy_open) / len(buy_open)
-        unrealized_pnl = (latest_price - avg_price) * len(buy_open)
-    elif sell_open:
-        avg_price = sum(sell_open) / len(sell_open)
-        unrealized_pnl = (avg_price - latest_price) * len(sell_open)
-
-    if position > 0:
-        status = "holding"  # 買いが残っていて、まだ売っていない（保有中）
-    elif position < 0:
-        status = "shorting"  # 売りが残っていて、まだ買い戻していない（空売り中）
-    else:
-        status = "flat"  # ちょうど買いと売りが相殺され、ポジションなし
-
-    return {
-        "status": status,
-        "position": position,
-        "avgPrice": round(avg_price, 2) if avg_price is not None else None,
-        "latestPrice": latest_price,
-        "realizedPnl": round(realized_pnl, 2),
-        "unrealizedPnl": round(unrealized_pnl, 2),
-        "totalPnl": round(realized_pnl + unrealized_pnl, 2),
-        "buyCount": buy_count,
-        "sellCount": sell_count,
-        "firstTradeDate": first_trade_date,
-        "lastTradeDate": last_trade_date,
-    }
-
-
-def compute_signal(prices: List[float], dates: Optional[List[str]] = None) -> Dict[str, Any]:
-    """トレンド・底値判定・グランビル判定・バックテスト・総合スコアをまとめて返す"""
+def compute_signal(prices: List[float]) -> Dict[str, Any]:
+    """トレンド・底値判定・グランビル判定・総合スコアをまとめて返す"""
     trends = {
         "d30": period_trend(prices, 30),
         "d60": period_trend(prices, 60),
@@ -288,8 +232,6 @@ def compute_signal(prices: List[float], dates: Optional[List[str]] = None) -> Di
     sma90 = simple_moving_average(prices, SMA_LONG_WINDOW)
     bottom = detect_local_minimum(sma30)
     granville_signals = compute_granville_signals(prices, sma30, sma90)
-    # datesが渡されなかった場合は空文字のダミー日付で代用する
-    backtest = simulate_granville_backtest(prices, dates or [""] * len(prices), granville_signals)
 
     score = 0
     if trends["d365"] is not None:
@@ -324,5 +266,4 @@ def compute_signal(prices: List[float], dates: Optional[List[str]] = None) -> Di
         "sma30": sma30,
         "sma90": sma90,
         "granvilleSignals": granville_signals,
-        "backtest": backtest,
     }
