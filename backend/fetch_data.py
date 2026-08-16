@@ -73,7 +73,7 @@ def fetch_one(stock: dict) -> dict | None:
         except Exception as e:
             print(f"  [WARN] {symbol}: 配当利回り取得に失敗しました ({e})", file=sys.stderr)
 
-        signal = compute_signal(prices, dates)
+        signal = compute_signal(prices)
 
         return {
             "code": stock["code"],
@@ -87,7 +87,6 @@ def fetch_one(stock: dict) -> dict | None:
             "sma30": signal["sma30"],
             "sma90": signal["sma90"],
             "granvilleSignals": signal["granvilleSignals"],
-            "backtest": signal["backtest"],
             "signal": {
                 "trends": signal["trends"],
                 "bottom": signal["bottom"],
