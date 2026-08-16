@@ -675,6 +675,7 @@ function GranvilleExplainerSample() {
             27通りのうち、あらかじめ指定された<strong>15パターン</strong>
             （買い時7パターン・売り時8パターン）だけを判定に使っています。
             残り12パターンは、根拠があいまいなため判定対象に含めていません。
+            各パターンの意味は下の一覧で確認できます。
           </p>
         </div>
         <div className="explainer__detail-card">
@@ -696,6 +697,64 @@ function GranvilleExplainerSample() {
           </p>
         </div>
       </div>
+
+      <details className="explainer__patterns">
+        <summary className="explainer__patterns-summary">
+          15パターンそれぞれの意味を見る（長期・中期・短期の向き別）
+        </summary>
+
+        <div className="explainer__patterns-block">
+          <div className="explainer__patterns-block-title">🟢 買いパターン（7通り）</div>
+          <table className="explainer__patterns-table">
+            <thead>
+              <tr>
+                <th>長期</th>
+                <th>中期</th>
+                <th>短期</th>
+                <th>意味</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>↗</td><td>↗</td><td>↗</td><td>長期・中期・短期すべて上昇。最も強い買い環境</td></tr>
+              <tr><td>↗</td><td>↗</td><td>→</td><td>長期・中期が上昇。短期は一服だが上昇トレンド維持</td></tr>
+              <tr><td>↗</td><td>→</td><td>↗</td><td>長期上昇＋短期上昇。中期線の上昇転換を待つ段階</td></tr>
+              <tr><td>→</td><td>↗</td><td>↗</td><td>中期・短期が上昇。長期は方向感なしだが買い優勢</td></tr>
+              <tr><td>→</td><td>↗</td><td>→</td><td>中期上昇。長期は横ばいで、短期も大きく崩れていない</td></tr>
+              <tr><td>↘</td><td>↗</td><td>↗</td><td>長期は下降だが、中期・短期が上昇。上昇転換の初動候補</td></tr>
+              <tr><td>↘</td><td>↗</td><td>→</td><td>長期下降の中で中期上昇。反転を確認する段階</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div className="explainer__patterns-block">
+          <div className="explainer__patterns-block-title">🔴 売りパターン（8通り）</div>
+          <table className="explainer__patterns-table">
+            <thead>
+              <tr>
+                <th>長期</th>
+                <th>中期</th>
+                <th>短期</th>
+                <th>意味</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>↗</td><td>↘</td><td>↘</td><td>長期上昇でも中期・短期が下降。調整・下降転換を警戒</td></tr>
+              <tr><td>↗</td><td>↘</td><td>→</td><td>長期は上昇だが中期下降。戻り売りを警戒</td></tr>
+              <tr><td>→</td><td>↘</td><td>↘</td><td>中期・短期が下降。長期も方向感なしで買いにくい</td></tr>
+              <tr><td>↘</td><td>↗</td><td>↘</td><td>長期下降＋短期下降。中期上昇でも押し戻されている</td></tr>
+              <tr><td>↘</td><td>→</td><td>↘</td><td>長期下降＋短期下降。中期線も横ばいで弱い</td></tr>
+              <tr><td>↘</td><td>↘</td><td>↗</td><td>長期・中期下降。短期上昇は単なる戻りの可能性</td></tr>
+              <tr><td>↘</td><td>↘</td><td>→</td><td>長期・中期とも下降。短期は一服</td></tr>
+              <tr><td>↘</td><td>↘</td><td>↘</td><td>長期・中期・短期すべて下降。最も強い売り環境</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p className="explainer__patterns-note">
+          ↗＝上昇　→＝横ばい　↘＝下降。長期＝90日移動平均線、中期＝30日移動平均線、
+          短期＝日々の株価の向きを表します。
+        </p>
+      </details>
     </div>
   );
 }
@@ -1034,6 +1093,78 @@ const STYLES = `
   line-height: 1.6;
   color: var(--text-dim);
   margin: 0;
+}
+
+.explainer__patterns {
+  margin-top: 4px;
+  border-top: 1px solid var(--card-border);
+  padding-top: 12px;
+}
+
+.explainer__patterns-summary {
+  cursor: pointer;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--teal);
+  list-style: none;
+}
+
+.explainer__patterns-summary::-webkit-details-marker {
+  display: none;
+}
+
+.explainer__patterns-summary::before {
+  content: "▶ ";
+  font-size: 10px;
+}
+
+.explainer__patterns[open] .explainer__patterns-summary::before {
+  content: "▼ ";
+}
+
+.explainer__patterns-block {
+  margin-top: 12px;
+}
+
+.explainer__patterns-block-title {
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.explainer__patterns-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+.explainer__patterns-table th {
+  text-align: left;
+  color: var(--text-dim);
+  font-weight: 600;
+  padding: 4px 6px;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.explainer__patterns-table td {
+  padding: 5px 6px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  color: var(--text);
+}
+
+.explainer__patterns-table td:nth-child(1),
+.explainer__patterns-table td:nth-child(2),
+.explainer__patterns-table td:nth-child(3) {
+  text-align: center;
+  font-family: "JetBrains Mono", monospace;
+  width: 28px;
+  color: var(--text-dim);
+}
+
+.explainer__patterns-note {
+  font-size: 10px;
+  color: var(--text-dim);
+  margin: 10px 0 0;
 }
 
 .alert-banner {
