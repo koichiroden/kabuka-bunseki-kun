@@ -40,6 +40,7 @@ function normalizeStock(raw) {
     sma30: raw.sma30 || null,
     sma90: raw.sma90 || null,
     granvilleSignals: raw.granvilleSignals || null,
+    granvilleSignalDetails: raw.granvilleSignalDetails || [],
     latestPrice: raw.latestPrice,
     dividendYield: raw.dividendYield,
     signal: {
@@ -535,11 +536,28 @@ function DetailModal({ stock, onClose }) {
                 </div>
               </div>
               <p className="modal__explain">
-                この銘柄の全期間の中で、判定基準に一致した候補日のうち
+                この銘柄の全期間の中で、8パターンの判定基準に一致した候補日のうち
                 「シグナルの強さスコア」が高い順に、買い・売りそれぞれ最大5日を
                 グラフ上に緑（買い）・赤（売り）の点で示しています。
                 現在の表示期間（最大180日）の外にある場合は、グラフには映りません。
               </p>
+
+              <div className="signal-list">
+                {[...(stock.granvilleSignalDetails || [])]
+                  .sort((a, b) => new Date(b.date) - new Date(a.date))
+                  .map((d, i) => (
+                    <div key={i} className={`signal-list__item signal-list__item--${d.type}`}>
+                      <div className="signal-list__date mono">{formatDateFull(d.date)}</div>
+                      <div className="signal-list__body">
+                        <span className={`signal-list__badge signal-list__badge--${d.type}`}>
+                          {d.type === "buy" ? "🟢 買い" : "🔴 売り"}
+                        </span>
+                        <span className="signal-list__label">{d.label}</span>
+                      </div>
+                      <div className="signal-list__price mono">¥{d.price.toLocaleString()}</div>
+                    </div>
+                  ))}
+              </div>
             </>
           ) : (
             <p className="modal__explain">
@@ -598,14 +616,13 @@ function AlertBanner({ buyList, onJump }) {
 // サイト最上部に置く、グランビルの法則（買い/売りシグナル）の解説パネル。
 // 実データではなく、説明用に手作りしたサンプルグラフを使う。
 function GranvilleExplainerSample() {
-  // サンプル用の株価っぽい折れ線（実データではなく説明用のダミー座標）
+  // サンプル用の株価っぽい折れ線と、移動平均線（実データではなく説明用のダミー座標）
   const pricePath =
-    "M0,70 L20,66 L40,72 L60,60 L80,64 L100,52 L120,56 L140,44 L160,48 L180,36 " +
-    "L200,40 L220,30 L240,34 L260,24 L280,28 L300,20";
-  const sma30Path =
-    "M20,68 L40,68 L60,66 L80,63 L100,58 L120,54 L140,50 L160,46 L180,42 " +
-    "L200,40 L220,37 L240,34 L260,31 L280,29 L300,26";
-  const sma90Path = "M60,72 L120,66 L180,54 L240,42 L300,32";
+    "M0,75 L20,68 L40,60 L60,68 L80,50 L100,58 L120,38 L140,48 L160,30 " +
+    "L180,42 L200,58 L220,50 L240,66 L260,54 L280,70 L300,52";
+  const maPath =
+    "M0,72 L20,70 L40,66 L60,63 L80,58 L100,54 L120,48 L140,45 L160,42 " +
+    "L180,44 L200,48 L220,50 L240,52 L260,54 L280,55 L300,55";
 
   return (
     <div className="explainer">
@@ -613,31 +630,29 @@ function GranvilleExplainerSample() {
         <div className="explainer__text">
           <h2 className="explainer__title">🟢🔴 買い時/売り時シグナルの見方</h2>
           <p className="explainer__body">
-            各銘柄について、<strong>90日移動平均線（長期・青の点線）</strong>・
-            <strong>30日移動平均線（中期・アンバーの点線）</strong>・
-            <strong>日々の株価（短期・ティール色の実線）</strong>の3本が、
-            それぞれ「上昇↗／横ばい→／下降↘」のどちらを向いているかを
-            日ごとにチェックしています。
+            各銘柄について、<strong>30日移動平均線</strong>（アンバーの点線）と
+            <strong>日々の株価</strong>（ティール色の実線）の位置関係・
+            移動平均線自体の向き（上向き/横ばい/下向き）から、
+            「グランビルの法則」と呼ばれる伝統的な売買シグナルの手法を使って
+            買い時・売り時を判定しています。
           </p>
           <p className="explainer__body">
-            この3方向の組み合わせ（3×3×3＝27通り）のうち、グランビルの法則を
-            参考にした判定表に一致する<strong>15パターン</strong>
-            （買いパターン7通り・売りパターン8通り）だけを候補とします。
-            表にない残り12通りのあいまいな組み合わせは、無理に判定せず
-            候補にも入れません。
+            グランビルの法則には、買い4パターン・売り4パターン、
+            合計<strong>8パターン</strong>の型があります。このアプリでは
+            全パターンを毎日チェックし、一致した候補日の中から
+            「シグナルの強さスコア」が高い順に、銘柄ごとに買い・売り
+            それぞれ最大5日を実際のシグナルとして表示します。
           </p>
         </div>
 
         <div className="explainer__sample">
           <svg viewBox="0 0 300 90" className="explainer__svg">
-            <path d={sma90Path} fill="none" stroke="#7C9CFF" strokeWidth="1.6" strokeDasharray="6,3" opacity="0.8" />
-            <path d={sma30Path} fill="none" stroke="#F0A857" strokeWidth="1.6" strokeDasharray="3,2" opacity="0.85" />
+            <path d={maPath} fill="none" stroke="#F0A857" strokeWidth="1.8" strokeDasharray="4,3" opacity="0.9" />
             <path d={pricePath} fill="none" stroke="#4FD1C5" strokeWidth="2" />
 
-            <circle cx="100" cy="52" r="4" fill="#3DDC84" stroke="#0B0F14" strokeWidth="0.8" />
-            <circle cx="180" cy="36" r="4" fill="#3DDC84" stroke="#0B0F14" strokeWidth="0.8" />
-            <circle cx="60" cy="60" r="4" fill="#E85D5D" stroke="#0B0F14" strokeWidth="0.8" />
-            <circle cx="140" cy="44" r="4" fill="#E85D5D" stroke="#0B0F14" strokeWidth="0.8" />
+            <circle cx="60" cy="68" r="4" fill="#3DDC84" stroke="#0B0F14" strokeWidth="0.8" />
+            <circle cx="160" cy="30" r="4" fill="#E85D5D" stroke="#0B0F14" strokeWidth="0.8" />
+            <circle cx="280" cy="70" r="4" fill="#3DDC84" stroke="#0B0F14" strokeWidth="0.8" />
           </svg>
           <div className="explainer__sample-legend">
             <span className="explainer__legend-item">
@@ -646,11 +661,7 @@ function GranvilleExplainerSample() {
             </span>
             <span className="explainer__legend-item">
               <span className="modal__legend-swatch modal__legend-swatch--sma30" />
-              30日線
-            </span>
-            <span className="explainer__legend-item">
-              <span className="modal__legend-swatch modal__legend-swatch--sma90" />
-              90日線
+              30日移動平均線
             </span>
             <span className="explainer__legend-item">
               <span className="modal__legend-dot modal__legend-dot--buy" />
@@ -671,20 +682,20 @@ function GranvilleExplainerSample() {
         <div className="explainer__detail-card">
           <div className="explainer__detail-card-title">① 何パターンで判定しているか</div>
           <p className="explainer__detail-card-body">
-            長期・中期・短期それぞれ3方向（上昇/横ばい/下降）の組み合わせ
-            27通りのうち、あらかじめ指定された<strong>15パターン</strong>
-            （買い時7パターン・売り時8パターン）だけを判定に使っています。
-            残り12パターンは、根拠があいまいなため判定対象に含めていません。
+            グランビルの法則の<strong>8パターン</strong>
+            （買い4パターン・売り4パターン）すべてを判定に使っています。
+            移動平均線には30日移動平均線を採用しています。
             各パターンの意味は下の一覧で確認できます。
           </p>
         </div>
         <div className="explainer__detail-card">
           <div className="explainer__detail-card-title">② スコアはどう算出されるか</div>
           <p className="explainer__detail-card-body">
-            上記15パターンに一致した日について、<strong>長期・中期・短期
-            それぞれの変化率(%)の絶対値を合計</strong>した値を
-            「シグナルの強さスコア」とします。3つの時間軸すべてで
-            値動きがはっきりしている日ほど、スコアが高くなります。
+            パターンに一致した日について、<strong>移動平均線からの
+            乖離率(%)の絶対値</strong>と、<strong>直近5営業日の値動きの
+            強さ(%)</strong>を足し合わせた値を「シグナルの強さスコア」とします。
+            移動平均線から大きく離れているほど、また値動きの勢いが
+            強いほど、スコアが高くなります。
           </p>
         </div>
         <div className="explainer__detail-card">
@@ -694,65 +705,45 @@ function GranvilleExplainerSample() {
             <strong>最大5日まで</strong>を実際のシグナルとして表示します。
             候補が5日に満たない場合は、無理に5日へ水増しせず、
             <strong>実際にある件数（0〜4日）だけ</strong>をそのまま表示します。
+            各銘柄の詳細画面では、実際にシグナリングされた日付と
+            「どのパターンで検知されたか」の理由も一覧で確認できます。
           </p>
         </div>
       </div>
 
       <details className="explainer__patterns">
         <summary className="explainer__patterns-summary">
-          15パターンそれぞれの意味を見る（長期・中期・短期の向き別）
+          8パターンそれぞれの意味を見る
         </summary>
 
         <div className="explainer__patterns-block">
-          <div className="explainer__patterns-block-title">🟢 買いパターン（7通り）</div>
-          <table className="explainer__patterns-table">
-            <thead>
-              <tr>
-                <th>長期</th>
-                <th>中期</th>
-                <th>短期</th>
-                <th>意味</th>
-              </tr>
-            </thead>
+          <div className="explainer__patterns-block-title">🟢 買いシグナル（4パターン）</div>
+          <table className="explainer__patterns-table explainer__patterns-table--single">
             <tbody>
-              <tr><td>↗</td><td>↗</td><td>↗</td><td>長期・中期・短期すべて上昇。最も強い買い環境</td></tr>
-              <tr><td>↗</td><td>↗</td><td>→</td><td>長期・中期が上昇。短期は一服だが上昇トレンド維持</td></tr>
-              <tr><td>↗</td><td>→</td><td>↗</td><td>長期上昇＋短期上昇。中期線の上昇転換を待つ段階</td></tr>
-              <tr><td>→</td><td>↗</td><td>↗</td><td>中期・短期が上昇。長期は方向感なしだが買い優勢</td></tr>
-              <tr><td>→</td><td>↗</td><td>→</td><td>中期上昇。長期は横ばいで、短期も大きく崩れていない</td></tr>
-              <tr><td>↘</td><td>↗</td><td>↗</td><td>長期は下降だが、中期・短期が上昇。上昇転換の初動候補</td></tr>
-              <tr><td>↘</td><td>↗</td><td>→</td><td>長期下降の中で中期上昇。反転を確認する段階</td></tr>
+              <tr><td className="explainer__patterns-num">①</td><td>横ばい/上向きの移動平均線を、現在値が下から上に抜けたとき</td></tr>
+              <tr><td className="explainer__patterns-num">②</td><td>上向きの移動平均線を、現在値が一時的に下抜けたとき（押し目買い）</td></tr>
+              <tr><td className="explainer__patterns-num">③</td><td>上向きの移動平均線に現在値が接近し、抜けずに反発したとき</td></tr>
+              <tr><td className="explainer__patterns-num">④</td><td>下向きの移動平均線から現在値が大きく下に離れたとき（自律反発狙い）</td></tr>
             </tbody>
           </table>
         </div>
 
         <div className="explainer__patterns-block">
-          <div className="explainer__patterns-block-title">🔴 売りパターン（8通り）</div>
-          <table className="explainer__patterns-table">
-            <thead>
-              <tr>
-                <th>長期</th>
-                <th>中期</th>
-                <th>短期</th>
-                <th>意味</th>
-              </tr>
-            </thead>
+          <div className="explainer__patterns-block-title">🔴 売りシグナル（4パターン）</div>
+          <table className="explainer__patterns-table explainer__patterns-table--single">
             <tbody>
-              <tr><td>↗</td><td>↘</td><td>↘</td><td>長期上昇でも中期・短期が下降。調整・下降転換を警戒</td></tr>
-              <tr><td>↗</td><td>↘</td><td>→</td><td>長期は上昇だが中期下降。戻り売りを警戒</td></tr>
-              <tr><td>→</td><td>↘</td><td>↘</td><td>中期・短期が下降。長期も方向感なしで買いにくい</td></tr>
-              <tr><td>↘</td><td>↗</td><td>↘</td><td>長期下降＋短期下降。中期上昇でも押し戻されている</td></tr>
-              <tr><td>↘</td><td>→</td><td>↘</td><td>長期下降＋短期下降。中期線も横ばいで弱い</td></tr>
-              <tr><td>↘</td><td>↘</td><td>↗</td><td>長期・中期下降。短期上昇は単なる戻りの可能性</td></tr>
-              <tr><td>↘</td><td>↘</td><td>→</td><td>長期・中期とも下降。短期は一服</td></tr>
-              <tr><td>↘</td><td>↘</td><td>↘</td><td>長期・中期・短期すべて下降。最も強い売り環境</td></tr>
+              <tr><td className="explainer__patterns-num">⑤</td><td>横ばい/下向きの移動平均線を、現在値が一時的に上抜けたとき</td></tr>
+              <tr><td className="explainer__patterns-num">⑥</td><td>下向きの移動平均線を、現在値が上から下に抜けたとき</td></tr>
+              <tr><td className="explainer__patterns-num">⑦</td><td>下向きの移動平均線に現在値が接近し、抜けずに反落したとき</td></tr>
+              <tr><td className="explainer__patterns-num">⑧</td><td>上向きの移動平均線から現在値が大きく上に離れたとき（自律反落狙い）</td></tr>
             </tbody>
           </table>
         </div>
 
         <p className="explainer__patterns-note">
-          ↗＝上昇　→＝横ばい　↘＝下降。長期＝90日移動平均線、中期＝30日移動平均線、
-          短期＝日々の株価の向きを表します。
+          「移動平均線」はこのアプリでは30日移動平均線を指します。
+          「大きく離れた」の判定は乖離率±8%、「接近した」の判定は乖離率±2%を
+          目安にしています。
         </p>
       </details>
     </div>
@@ -1161,6 +1152,22 @@ const STYLES = `
   color: var(--text-dim);
 }
 
+.explainer__patterns-table--single td:nth-child(1),
+.explainer__patterns-table--single td:nth-child(2),
+.explainer__patterns-table--single td:nth-child(3) {
+  text-align: left;
+  font-family: inherit;
+  width: auto;
+  color: inherit;
+}
+
+.explainer__patterns-num {
+  font-weight: 700;
+  color: var(--teal) !important;
+  width: 26px !important;
+  vertical-align: top;
+}
+
 .explainer__patterns-note {
   font-size: 10px;
   color: var(--text-dim);
@@ -1444,6 +1451,64 @@ const STYLES = `
 .granville__detail-value {
   font-size: 12.5px;
   font-weight: 600;
+}
+
+.signal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.signal-list__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 8px;
+  padding: 8px 10px;
+  border-left: 3px solid transparent;
+}
+
+.signal-list__item--buy { border-left-color: #3DDC84; }
+.signal-list__item--sell { border-left-color: var(--red); }
+
+.signal-list__date {
+  font-size: 10.5px;
+  color: var(--text-dim);
+  flex-shrink: 0;
+  width: 90px;
+}
+
+.signal-list__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.signal-list__badge {
+  font-size: 10px;
+  font-weight: 700;
+  width: fit-content;
+}
+
+.signal-list__badge--buy { color: #3DDC84; }
+.signal-list__badge--sell { color: var(--red); }
+
+.signal-list__label {
+  font-size: 11px;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+.signal-list__price {
+  font-size: 11.5px;
+  color: var(--text-dim);
+  flex-shrink: 0;
 }
 
 .empty-state {
