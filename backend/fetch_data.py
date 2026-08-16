@@ -75,6 +75,20 @@ def fetch_one(stock: dict) -> dict | None:
 
         signal = compute_signal(prices)
 
+        # granvilleSignalDetailsはindex(配列内の位置)しか持っていないので、
+        # ここで実際の日付・価格を付与してフロントで使いやすい形にする
+        signal_details = [
+            {
+                "date": dates[d["index"]],
+                "price": prices[d["index"]],
+                "type": d["type"],
+                "rule": d["rule"],
+                "label": d["label"],
+                "score": round(d["score"], 2),
+            }
+            for d in signal["granvilleSignalDetails"]
+        ]
+
         return {
             "code": stock["code"],
             "name": stock["name"],
@@ -87,6 +101,7 @@ def fetch_one(stock: dict) -> dict | None:
             "sma30": signal["sma30"],
             "sma90": signal["sma90"],
             "granvilleSignals": signal["granvilleSignals"],
+            "granvilleSignalDetails": signal_details,
             "signal": {
                 "trends": signal["trends"],
                 "bottom": signal["bottom"],

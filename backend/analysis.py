@@ -6,14 +6,12 @@
   移動平均線が下降→上昇に転換し、かつ下に凸になっているタイミングを検出する。
   生の終値は日々のノイズが大きく、底値判定が不安定になりやすいため、
   30日移動平均線というなめらかにした曲線の上で極小値を探す方式にしている。
-- グランビルの法則を参考にした「買い時/売り時スコア」の算出と
-  上位シグナルの抽出
-  90日移動平均線（長期）・30日移動平均線（中期）・日々の株価（短期/日次）
-  それぞれの向き（上昇/横ばい/下降）の組み合わせが、あらかじめ定義した
-  判定表に一致する日を候補とし、その中から「シグナルの強さスコア」
-  （3つの時間軸の変化率の絶対値の合計）が高い順に、買い・売りそれぞれ
-  上位5日だけを実際のシグナルとして抽出する。候補が5日に満たない銘柄は
-  その方向をシグナリングしない。
+- グランビルの法則（8つの売買シグナル）に基づく買い時/売り時の検出
+  1本の移動平均線（30日線）と現在値（株価）の位置関係・移動平均線自体の
+  向きから、買い4パターン・売り4パターンの合計8パターンを判定する。
+  一致した候補日のうち「シグナルの強さスコア」（移動平均線からの乖離率と
+  直近の値動きの強さ）が高い順に、買い・売りそれぞれ最大5日までを実際の
+  シグナルとして抽出する。どの日がどのパターンで検知されたかも記録する。
 - 総合スコアリング（-100〜100）と判定ラベル
 
 React版(App.jsx)のcomputeSignalと同じ考え方をPythonに移植したもの。
@@ -140,83 +138,186 @@ def trend_info_series(
     return result
 
 
-# グランビルの法則を参考にした、90日(長期)・30日(中期)・日次(短期)の
-# トレンドの向きの組み合わせから「買い/売り」を判定するテーブル。
-# ユーザー提供の判定表をそのまま反映したもの。
-# キーは (90日トレンド, 30日トレンド, 日次トレンド) の3つ組。
+# ---------- グランビルの法則（8つの売買シグナル） ----------
 #
-# 注意: 3方向 × 3方向 × 3方向 = 27通りの組み合わせのうち、
-# ここに定義されているのは明示的に指定された15通り（買い7通り・売り8通り）だけ。
-# 表にない残り12通りの組み合わせの日は「買い」でも「売り」でもない扱いとする。
-# あいまいな組み合わせを多数決などで無理に買い/売りに分類しない、というのが
-# 今回の設計方針。
-GRANVILLE_TABLE: Dict[tuple, str] = {
-    ("up", "up", "up"): "buy",
-    ("up", "up", "flat"): "buy",
-    ("up", "flat", "up"): "buy",
-    ("flat", "up", "up"): "buy",
-    ("flat", "up", "flat"): "buy",
-    ("down", "up", "up"): "buy",
-    ("down", "up", "flat"): "buy",
-    ("up", "down", "down"): "sell",
-    ("up", "down", "flat"): "sell",
-    ("flat", "down", "down"): "sell",
-    ("down", "up", "down"): "sell",
-    ("down", "flat", "down"): "sell",
-    ("down", "down", "up"): "sell",
-    ("down", "down", "flat"): "sell",
-    ("down", "down", "down"): "sell",
+# 一般に「グランビルの法則」と呼ばれるのは、1本の移動平均線と現在値（株価）の
+# 位置関係・移動平均線自体の向きから、買い4パターン・売り4パターン、
+# 合計8つの売買シグナルを見つける手法です。このアプリでは、移動平均線として
+# 30日移動平均線（中期線）を採用しています。
+#
+# 【買いシグナル】
+#   ①横ばい/上向きの移動平均線を、現在値が下から上に抜けたとき
+#   ②上向きの移動平均線を、現在値が一時的に下抜けたとき（押し目買い）
+#   ③上向きの移動平均線に現在値が接近し、抜けずに反発したとき
+#   ④下向きの移動平均線から現在値が大きく下に離れたとき（自律反発狙い）
+# 【売りシグナル】
+#   ⑤横ばい/下向きの移動平均線を、現在値が一時的に上抜けたとき
+#   ⑥下向きの移動平均線を、現在値が上から下に抜けたとき
+#   ⑦下向きの移動平均線に現在値が接近し、抜けずに反落したとき
+#   ⑧上向きの移動平均線から現在値が大きく上に離れたとき（自律反落狙い）
+
+GRANVILLE_MA_WINDOW = SMA_WINDOW  # グランビル判定に使う移動平均線（30日線）
+GRANVILLE_NEAR_PCT = 2.0   # ③⑦「移動平均線に接近した」とみなす乖離率のしきい値(%)
+GRANVILLE_FAR_PCT = 8.0    # ④⑧「移動平均線から大きく離れた」とみなすしきい値(%)
+GRANVILLE_MOMENTUM_LOOKBACK = 5  # ③⑦の「反発/反落」を見るための直近の日数
+GRANVILLE_LONG_LOOKBACK = 15     # ①⑤の「横ばい」の文脈（底/天井どちら側か）を判断する日数
+
+GRANVILLE_RULE_LABELS: Dict[int, str] = {
+    1: "①横ばい/上向きの移動平均線を現在値が上抜けたとき",
+    2: "②上向きの移動平均線を現在値が一時的に下抜けたとき（押し目買い）",
+    3: "③上向きの移動平均線に接近し、抜けずに反発したとき",
+    4: "④下向きの移動平均線から現在値が大きく下に離れたとき（自律反発狙い）",
+    5: "⑤横ばい/下向きの移動平均線を現在値が一時的に上抜けたとき",
+    6: "⑥下向きの移動平均線を現在値が下抜けたとき",
+    7: "⑦下向きの移動平均線に接近し、抜けずに反落したとき",
+    8: "⑧上向きの移動平均線から現在値が大きく上に離れたとき（自律反落狙い）",
 }
 
 TOP_SIGNAL_COUNT = 5  # 銘柄ごとに、買い/売りそれぞれ上位何日までシグナリングするか
 
 
-def compute_granville_signals(
-    prices: List[float], sma30: List[Optional[float]], sma90: List[Optional[float]]
-) -> List[Optional[str]]:
+def find_granville_candidates(
+    prices: List[float], ma: List[Optional[float]]
+) -> List[Dict[str, Any]]:
     """
-    株価の全履歴について、日ごとに90日線・30日線・日次の向きの組み合わせを求め、
-    GRANVILLE_TABLE に明確に定義されている「買い」「売り」の候補日を洗い出したうえで、
-    それぞれの「シグナルの強さスコア」（後述）が高い順に、買い・売りそれぞれ最大
-    TOP_SIGNAL_COUNT件までを実際のシグナルとして残す。
+    株価(prices)と移動平均線(ma)の関係から、グランビルの法則8パターンに
+    一致する候補日をすべて洗い出す。
 
-    スコアは「90日線・30日線・日次それぞれの変化率(%)の絶対値の合計」。
-    3つの時間軸すべてで値動きがはっきりしている日ほど、スコアが高くなる
-    （＝より根拠が強い、と考える）。
-
-    候補日がTOP_SIGNAL_COUNT件に満たない場合は、無理に5件に揃えたりはせず、
-    実際に候補として存在する日（0〜4件）だけをそのままシグナルとする。
-    候補が0件なら、その方向は結果としてシグナルなしになる。
-
-    pricesと同じ長さのリスト（各要素は "buy" / "sell" / None）を返す。
+    各候補は {"index", "type"(buy/sell), "rule"(1〜8), "label", "score"} の形。
+    「score」は、その日の乖離率(%)の絶対値とモメンタム(直近の値動きの強さ%)を
+    足し合わせたもので、値が大きいほどシグナルの根拠が強いとみなす。
     """
-    info90 = trend_info_series(sma90, lookback=10)
-    info30 = trend_info_series(sma30, lookback=5)
-    info_daily = trend_info_series(prices, lookback=2, flat_threshold_pct=0.3)
-
     n = len(prices)
-    candidates: Dict[str, List[tuple]] = {"buy": [], "sell": []}  # [(index, score), ...]
+    ma_dir = trend_info_series(ma, lookback=5, flat_threshold_pct=0.3)
+    # 短期の向きが「横ばい」のときに①（買い）と⑤（売り）のどちらの文脈かを
+    # 判断するための、より長い期間で見た移動平均線の大局的な向き。
+    # 「横ばい」は本来「下降から横ばいへ転じた（→そろそろ底）」のか
+    # 「上昇から横ばいへ転じた（→そろそろ天井）」のかで意味が正反対なので、
+    # この大局観で切り分ける。
+    ma_dir_long = trend_info_series(ma, lookback=GRANVILLE_LONG_LOOKBACK, flat_threshold_pct=0.5)
+    candidates: List[Dict[str, Any]] = []
 
-    for i in range(n):
-        i90, i30, idaily = info90[i], info30[i], info_daily[i]
-        if i90 is None or i30 is None or idaily is None:
+    for i in range(1, n):
+        if ma[i] is None or ma[i - 1] is None or ma_dir[i] is None:
             continue
-        key = (i90["direction"], i30["direction"], idaily["direction"])
-        verdict = GRANVILLE_TABLE.get(key)
-        if verdict is None:
+
+        p, p_prev = prices[i], prices[i - 1]
+        m, m_prev = ma[i], ma[i - 1]
+        direction = ma_dir[i]["direction"]  # 移動平均線自体の向き: up/flat/down
+        long_direction = ma_dir_long[i]["direction"] if ma_dir_long[i] is not None else None
+
+        if m == 0:
             continue
-        score = abs(i90["changePct"]) + abs(i30["changePct"]) + abs(idaily["changePct"])
-        candidates[verdict].append((i, score))
+        deviation_pct = (p - m) / m * 100  # 移動平均線からの乖離率(%): 正=上、負=下
+
+        momentum_pct = None
+        if i >= GRANVILLE_MOMENTUM_LOOKBACK:
+            base = prices[i - GRANVILLE_MOMENTUM_LOOKBACK]
+            if base != 0:
+                momentum_pct = (p - base) / base * 100
+
+        cross_up = p_prev < m_prev and p >= m    # 下から上へ移動平均線を突破
+        cross_down = p_prev >= m_prev and p < m  # 上から下へ移動平均線を突破
+
+        score = abs(deviation_pct) + (abs(momentum_pct) if momentum_pct is not None else 0)
+
+        def add(verdict: str, rule: int) -> None:
+            candidates.append(
+                {
+                    "index": i,
+                    "type": verdict,
+                    "rule": rule,
+                    "label": GRANVILLE_RULE_LABELS[rule],
+                    "score": score,
+                }
+            )
+
+        # --- 買いシグナル ---
+        if cross_up and (
+            direction == "up" or (direction == "flat" and long_direction != "up")
+        ):
+            add("buy", 1)
+        if direction == "up" and cross_down:
+            add("buy", 2)
+        if (
+            direction == "up"
+            and 0 < deviation_pct <= GRANVILLE_NEAR_PCT
+            and momentum_pct is not None
+            and momentum_pct > 0
+        ):
+            add("buy", 3)
+        if direction == "down" and deviation_pct <= -GRANVILLE_FAR_PCT:
+            add("buy", 4)
+
+        # --- 売りシグナル ---
+        if cross_up and (
+            direction == "down" or (direction == "flat" and long_direction == "up")
+        ):
+            add("sell", 5)
+        if direction == "down" and cross_down:
+            add("sell", 6)
+        if (
+            direction == "down"
+            and -GRANVILLE_NEAR_PCT <= deviation_pct < 0
+            and momentum_pct is not None
+            and momentum_pct < 0
+        ):
+            add("sell", 7)
+        if direction == "up" and deviation_pct >= GRANVILLE_FAR_PCT:
+            add("sell", 8)
+
+    return candidates
+
+
+def compute_granville_signals(
+    prices: List[float], ma: List[Optional[float]]
+) -> Dict[str, Any]:
+    """
+    グランビルの法則8パターンの候補日を洗い出し、買い・売りそれぞれ
+    「シグナルの強さスコア」が高い順に最大 TOP_SIGNAL_COUNT 件までを抽出する。
+
+    同じ日に複数のパターンが同時に該当した場合は、その日・その方向（買い/売り）
+    についてスコアが最も高いパターン1つだけを採用する（1日に複数の理由が
+    重複して表示されるのを防ぐため）。
+
+    候補が TOP_SIGNAL_COUNT 件に満たない場合は、無理に件数を揃えたりはせず、
+    実際に存在する件数（0〜4件）だけをそのままシグナルとする。
+
+    戻り値:
+      {
+        "signals": pricesと同じ長さのリスト（各要素は "buy"/"sell"/None）
+                   → グラフ上に点を打つ用
+        "details": [{"index","type","rule","label","score"}, ...]
+                   → 「いつ・なぜシグナリングされたか」を一覧表示する用
+                     （日付順に並べ替え済み）
+      }
+    """
+    n = len(prices)
+    candidates = find_granville_candidates(prices, ma)
+
+    # 同じ日・同じ方向の候補が複数ある場合は、スコア最大のものだけを残す
+    best_by_key: Dict[tuple, Dict[str, Any]] = {}
+    for c in candidates:
+        key = (c["index"], c["type"])
+        if key not in best_by_key or c["score"] > best_by_key[key]["score"]:
+            best_by_key[key] = c
+
+    by_type: Dict[str, List[Dict[str, Any]]] = {"buy": [], "sell": []}
+    for c in best_by_key.values():
+        by_type[c["type"]].append(c)
+
+    kept: List[Dict[str, Any]] = []
+    for verdict, items in by_type.items():
+        items.sort(key=lambda c: c["score"], reverse=True)
+        kept.extend(items[:TOP_SIGNAL_COUNT])
+
+    kept.sort(key=lambda c: c["index"])
 
     signals: List[Optional[str]] = [None] * n
-    for verdict, items in candidates.items():
-        # items.sort + [:TOP_SIGNAL_COUNT] は、候補が5件未満でもそのまま
-        # 全件（0〜4件）を残す。無理に5件へ水増しすることはない。
-        items.sort(key=lambda pair: pair[1], reverse=True)
-        for idx, _score in items[:TOP_SIGNAL_COUNT]:
-            signals[idx] = verdict
+    for c in kept:
+        signals[c["index"]] = c["type"]
 
-    return signals
+    return {"signals": signals, "details": kept}
 
 
 def compute_signal(prices: List[float]) -> Dict[str, Any]:
@@ -231,7 +332,7 @@ def compute_signal(prices: List[float]) -> Dict[str, Any]:
     sma30 = simple_moving_average(prices, SMA_WINDOW)
     sma90 = simple_moving_average(prices, SMA_LONG_WINDOW)
     bottom = detect_local_minimum(sma30)
-    granville_signals = compute_granville_signals(prices, sma30, sma90)
+    granville = compute_granville_signals(prices, sma30)
 
     score = 0
     if trends["d365"] is not None:
@@ -265,5 +366,6 @@ def compute_signal(prices: List[float]) -> Dict[str, Any]:
         "verdict": verdict,
         "sma30": sma30,
         "sma90": sma90,
-        "granvilleSignals": granville_signals,
+        "granvilleSignals": granville["signals"],
+        "granvilleSignalDetails": granville["details"],
     }
