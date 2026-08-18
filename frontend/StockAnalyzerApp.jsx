@@ -30,6 +30,18 @@ function formatDateFull(dateStr) {
 // APIから取得したstocks.jsonの1銘柄分を、UIが使いやすい形に整形する。
 // dates は文字列("YYYY-MM-DD")のまま保持し、表示時にDateへ変換する。
 function normalizeStock(raw) {
+  const granvilleSignalDetails = raw.granvilleSignalDetails || [];
+  // 「シグナル日が近い順」の並び替え用に、買い/売り問わず
+  // 一番新しい（今日に近い）シグナル日をあらかじめ計算しておく。
+  // シグナルが1件もない銘柄はnullになる。
+  const latestSignalDate =
+    granvilleSignalDetails.length > 0
+      ? granvilleSignalDetails.reduce(
+          (latest, d) => (!latest || d.date > latest ? d.date : latest),
+          null
+        )
+      : null;
+
   return {
     code: raw.code,
     name: raw.name,
@@ -40,7 +52,8 @@ function normalizeStock(raw) {
     sma30: raw.sma30 || null,
     sma90: raw.sma90 || null,
     granvilleSignals: raw.granvilleSignals || null,
-    granvilleSignalDetails: raw.granvilleSignalDetails || [],
+    granvilleSignalDetails,
+    latestSignalDate,
     latestPrice: raw.latestPrice,
     dividendYield: raw.dividendYield,
     signal: {
@@ -104,6 +117,40 @@ function useStockData() {
   }, []);
 
   return state;
+}
+
+const FAVORITES_STORAGE_KEY = "kabuka-bunseki-kun:favorites";
+
+// お気に入り銘柄（証券コードの集合）を、ブラウザのlocalStorageに保存して
+// 次回訪問時にも復元するためのフック。
+function useFavorites() {
+  const [favorites, setFavorites] = useState(() => {
+    try {
+      const raw = window.localStorage.getItem(FAVORITES_STORAGE_KEY);
+      return raw ? new Set(JSON.parse(raw)) : new Set();
+    } catch (e) {
+      return new Set();
+    }
+  });
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify([...favorites]));
+    } catch (e) {
+      // localStorageが使えない環境（プライベートモード等）では黙って無視する
+    }
+  }, [favorites]);
+
+  function toggleFavorite(code) {
+    setFavorites((prev) => {
+      const next = new Set(prev);
+      if (next.has(code)) next.delete(code);
+      else next.add(code);
+      return next;
+    });
+  }
+
+  return { favorites, toggleFavorite };
 }
 
 // ---------- UI サブコンポーネント ----------
@@ -378,14 +425,34 @@ function GranvilleSummary({ granvilleSignals }) {
   );
 }
 
-function StockCard({ stock, onOpen }) {
+function StockCard({ stock, onOpen, isFavorite, onToggleFavorite }) {
   const { signal, granvilleSignals } = stock;
   // min_idxはバックエンド側で、30日移動平均線の配列全体における
   // 絶対インデックスとして計算済みなので、そのまま使える。
   const bottomIdxGlobal = signal.bottom.isBottom ? signal.bottom.minIdx : null;
 
   return (
-    <button className="stock-card" onClick={() => onOpen(stock)}>
+    <div
+      className="stock-card"
+      role="button"
+      tabIndex={0}
+      onClick={() => onOpen(stock)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") onOpen(stock);
+      }}
+    >
+      <button
+        type="button"
+        className={`stock-card__favorite ${isFavorite ? "stock-card__favorite--active" : ""}`}
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggleFavorite(stock.code);
+        }}
+        aria-label={isFavorite ? "お気に入りから外す" : "お気に入りに追加"}
+      >
+        {isFavorite ? "★" : "☆"}
+      </button>
+
       <div className="stock-card__top">
         <div>
           <div className="stock-card__name">{stock.name}</div>
@@ -434,13 +501,13 @@ function StockCard({ stock, onOpen }) {
           底値シグナル検知（{signal.bottom.daysSinceMin}日前に極小値）
         </div>
       )}
-    </button>
+    </div>
   );
 }
 
 // 「買いシグナルの日に1株買い、売りシグナルの日に1株売っていたら
 // 最新日時点でどうなっているか」のバックテスト結果を表示するセクション。
-function DetailModal({ stock, onClose }) {
+function DetailModal({ stock, onClose, isFavorite, onToggleFavorite }) {
   if (!stock) return null;
   const { signal, granvilleSignals } = stock;
 
@@ -460,9 +527,19 @@ function DetailModal({ stock, onClose }) {
               {stock.code} ・ {stock.index} ・ {stock.sector}
             </div>
           </div>
-          <button className="modal__close" onClick={onClose} aria-label="閉じる">
-            ✕
-          </button>
+          <div className="modal__header-actions">
+            <button
+              type="button"
+              className={`modal__favorite ${isFavorite ? "modal__favorite--active" : ""}`}
+              onClick={() => onToggleFavorite(stock.code)}
+              aria-label={isFavorite ? "お気に入りから外す" : "お気に入りに追加"}
+            >
+              {isFavorite ? "★" : "☆"}
+            </button>
+            <button className="modal__close" onClick={onClose} aria-label="閉じる">
+              ✕
+            </button>
+          </div>
         </div>
 
         <div className="modal__hero">
@@ -754,6 +831,7 @@ function GranvilleExplainerSample() {
 
 export default function App() {
   const { status, stocks: dataset, generatedAt, errorMessage } = useStockData();
+  const { favorites, toggleFavorite } = useFavorites();
   const [indexFilter, setIndexFilter] = useState("すべて");
   const [sectorFilter, setSectorFilter] = useState("すべて");
   const [sortKey, setSortKey] = useState("score");
@@ -779,10 +857,23 @@ export default function App() {
       if (sortKey === "score") return b.signal.score - a.signal.score;
       if (sortKey === "dividend") return b.dividendYield - a.dividendYield;
       if (sortKey === "price") return b.latestPrice - a.latestPrice;
+      if (sortKey === "signalRecency") {
+        // シグナルが無い銘柄は末尾へ。両方ある場合は日付が新しい方を優先。
+        if (!a.latestSignalDate && !b.latestSignalDate) return 0;
+        if (!a.latestSignalDate) return 1;
+        if (!b.latestSignalDate) return -1;
+        return b.latestSignalDate.localeCompare(a.latestSignalDate);
+      }
+      if (sortKey === "favorite") {
+        const aFav = favorites.has(a.code) ? 1 : 0;
+        const bFav = favorites.has(b.code) ? 1 : 0;
+        if (aFav !== bFav) return bFav - aFav;
+        return b.signal.score - a.signal.score; // お気に入り同士はおすすめ度で並べる
+      }
       return 0;
     });
     return list;
-  }, [dataset, indexFilter, sectorFilter, sortKey]);
+  }, [dataset, indexFilter, sectorFilter, sortKey, favorites]);
 
   if (status === "loading") {
     return (
@@ -869,7 +960,7 @@ export default function App() {
 
         <div className="filter-group">
           <span className="filter-group__label">並び替え</span>
-          <div className="chip-row">
+          <div className="chip-row chip-row--wrap">
             <button
               className={`chip chip--sm ${sortKey === "score" ? "chip--active" : ""}`}
               onClick={() => setSortKey("score")}
@@ -888,13 +979,31 @@ export default function App() {
             >
               株価
             </button>
+            <button
+              className={`chip chip--sm ${sortKey === "signalRecency" ? "chip--active" : ""}`}
+              onClick={() => setSortKey("signalRecency")}
+            >
+              シグナル日が近い順
+            </button>
+            <button
+              className={`chip chip--sm ${sortKey === "favorite" ? "chip--active" : ""}`}
+              onClick={() => setSortKey("favorite")}
+            >
+              ⭐ お気に入り順
+            </button>
           </div>
         </div>
       </div>
 
       <main className="stock-grid" ref={listRef}>
         {filtered.map((s) => (
-          <StockCard key={s.code} stock={s} onOpen={setSelected} />
+          <StockCard
+            key={s.code}
+            stock={s}
+            onOpen={setSelected}
+            isFavorite={favorites.has(s.code)}
+            onToggleFavorite={toggleFavorite}
+          />
         ))}
         {filtered.length === 0 && <p className="empty-state">該当する銘柄がありません。</p>}
       </main>
@@ -906,7 +1015,12 @@ export default function App() {
         </p>
       </footer>
 
-      <DetailModal stock={selected} onClose={() => setSelected(null)} />
+      <DetailModal
+        stock={selected}
+        onClose={() => setSelected(null)}
+        isFavorite={selected ? favorites.has(selected.code) : false}
+        onToggleFavorite={toggleFavorite}
+      />
     </div>
   );
 }
@@ -1273,6 +1387,7 @@ const STYLES = `
 }
 
 .stock-card {
+  position: relative;
   text-align: left;
   background: var(--card);
   border: 1px solid var(--card-border);
@@ -1290,11 +1405,30 @@ const STYLES = `
 .stock-card:active { transform: scale(0.99); }
 .stock-card:hover { border-color: #2A3742; }
 
+.stock-card__favorite {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 4px;
+  z-index: 2;
+}
+
+.stock-card__favorite--active {
+  color: var(--amber);
+}
+
 .stock-card__top {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   gap: 8px;
+  padding-right: 26px;
 }
 
 .stock-card__badges {
@@ -1622,6 +1756,26 @@ const STYLES = `
   font-size: 16px;
   cursor: pointer;
   padding: 4px;
+}
+
+.modal__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modal__favorite {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.modal__favorite--active {
+  color: var(--amber);
 }
 
 .modal__hero {

@@ -12,6 +12,11 @@
     return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}(${week})`;
   }
   function normalizeStock(raw) {
+    const granvilleSignalDetails = raw.granvilleSignalDetails || [];
+    const latestSignalDate = granvilleSignalDetails.length > 0 ? granvilleSignalDetails.reduce(
+      (latest, d) => !latest || d.date > latest ? d.date : latest,
+      null
+    ) : null;
     return {
       code: raw.code,
       name: raw.name,
@@ -22,7 +27,8 @@
       sma30: raw.sma30 || null,
       sma90: raw.sma90 || null,
       granvilleSignals: raw.granvilleSignals || null,
-      granvilleSignalDetails: raw.granvilleSignalDetails || [],
+      granvilleSignalDetails,
+      latestSignalDate,
       latestPrice: raw.latestPrice,
       dividendYield: raw.dividendYield,
       signal: {
@@ -81,6 +87,32 @@
       };
     }, []);
     return state;
+  }
+  var FAVORITES_STORAGE_KEY = "kabuka-bunseki-kun:favorites";
+  function useFavorites() {
+    const [favorites, setFavorites] = useState(() => {
+      try {
+        const raw = window.localStorage.getItem(FAVORITES_STORAGE_KEY);
+        return raw ? new Set(JSON.parse(raw)) : /* @__PURE__ */ new Set();
+      } catch (e) {
+        return /* @__PURE__ */ new Set();
+      }
+    });
+    useEffect(() => {
+      try {
+        window.localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify([...favorites]));
+      } catch (e) {
+      }
+    }, [favorites]);
+    function toggleFavorite(code) {
+      setFavorites((prev) => {
+        const next = new Set(prev);
+        if (next.has(code)) next.delete(code);
+        else next.add(code);
+        return next;
+      });
+    }
+    return { favorites, toggleFavorite };
   }
   function Sparkline({
     prices,
@@ -272,27 +304,65 @@
     if (buyCount === 0 && sellCount === 0) return null;
     return /* @__PURE__ */ React.createElement("div", { className: "granville-summary" }, buyCount > 0 && /* @__PURE__ */ React.createElement("span", { className: "granville-summary__item granville-summary__item--buy" }, "\u{1F7E2} \u8CB7\u3044\xD7", buyCount), sellCount > 0 && /* @__PURE__ */ React.createElement("span", { className: "granville-summary__item granville-summary__item--sell" }, "\u{1F534} \u58F2\u308A\xD7", sellCount));
   }
-  function StockCard({ stock, onOpen }) {
+  function StockCard({ stock, onOpen, isFavorite, onToggleFavorite }) {
     const { signal, granvilleSignals } = stock;
     const bottomIdxGlobal = signal.bottom.isBottom ? signal.bottom.minIdx : null;
-    return /* @__PURE__ */ React.createElement("button", { className: "stock-card", onClick: () => onOpen(stock) }, /* @__PURE__ */ React.createElement("div", { className: "stock-card__top" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { className: "stock-card__name" }, stock.name), /* @__PURE__ */ React.createElement("div", { className: "stock-card__meta" }, stock.code, " \u30FB ", stock.sector)), /* @__PURE__ */ React.createElement("div", { className: "stock-card__badges" }, /* @__PURE__ */ React.createElement(VerdictBadge, { verdict: signal.verdict }))), /* @__PURE__ */ React.createElement("div", { className: "stock-card__body" }, /* @__PURE__ */ React.createElement(
-      Sparkline,
+    return /* @__PURE__ */ React.createElement(
+      "div",
       {
-        prices: stock.prices,
-        dates: stock.dates,
-        sma30: stock.sma30,
-        sma90: stock.sma90,
-        highlightIdx: signal.bottom.isBottom ? bottomIdxGlobal : null,
-        granvilleSignals
-      }
-    ), /* @__PURE__ */ React.createElement("div", { className: "stock-card__stats" }, /* @__PURE__ */ React.createElement("div", { className: "stat" }, /* @__PURE__ */ React.createElement("span", { className: "stat__label" }, "\u682A\u4FA1"), /* @__PURE__ */ React.createElement("span", { className: "stat__value mono" }, "\xA5", stock.latestPrice.toLocaleString())), /* @__PURE__ */ React.createElement("div", { className: "stat" }, /* @__PURE__ */ React.createElement("span", { className: "stat__label" }, "\u914D\u5F53\u5229\u56DE\u308A"), /* @__PURE__ */ React.createElement("span", { className: "stat__value mono" }, stock.dividendYield.toFixed(1), "%")))), /* @__PURE__ */ React.createElement(GranvilleSummary, { granvilleSignals }), /* @__PURE__ */ React.createElement("div", { className: "stock-card__trends" }, /* @__PURE__ */ React.createElement(TrendChip, { label: "30\u65E5", value: signal.trends.d30 }), /* @__PURE__ */ React.createElement(TrendChip, { label: "60\u65E5", value: signal.trends.d60 }), /* @__PURE__ */ React.createElement(TrendChip, { label: "120\u65E5", value: signal.trends.d120 }), /* @__PURE__ */ React.createElement(TrendChip, { label: "180\u65E5", value: signal.trends.d180 }), /* @__PURE__ */ React.createElement(TrendChip, { label: "365\u65E5", value: signal.trends.d365 })), signal.bottom.isBottom && /* @__PURE__ */ React.createElement("div", { className: "stock-card__bottom-flag" }, "\u5E95\u5024\u30B7\u30B0\u30CA\u30EB\u691C\u77E5\uFF08", signal.bottom.daysSinceMin, "\u65E5\u524D\u306B\u6975\u5C0F\u5024\uFF09"));
+        className: "stock-card",
+        role: "button",
+        tabIndex: 0,
+        onClick: () => onOpen(stock),
+        onKeyDown: (e) => {
+          if (e.key === "Enter" || e.key === " ") onOpen(stock);
+        }
+      },
+      /* @__PURE__ */ React.createElement(
+        "button",
+        {
+          type: "button",
+          className: `stock-card__favorite ${isFavorite ? "stock-card__favorite--active" : ""}`,
+          onClick: (e) => {
+            e.stopPropagation();
+            onToggleFavorite(stock.code);
+          },
+          "aria-label": isFavorite ? "\u304A\u6C17\u306B\u5165\u308A\u304B\u3089\u5916\u3059" : "\u304A\u6C17\u306B\u5165\u308A\u306B\u8FFD\u52A0"
+        },
+        isFavorite ? "\u2605" : "\u2606"
+      ),
+      /* @__PURE__ */ React.createElement("div", { className: "stock-card__top" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { className: "stock-card__name" }, stock.name), /* @__PURE__ */ React.createElement("div", { className: "stock-card__meta" }, stock.code, " \u30FB ", stock.sector)), /* @__PURE__ */ React.createElement("div", { className: "stock-card__badges" }, /* @__PURE__ */ React.createElement(VerdictBadge, { verdict: signal.verdict }))),
+      /* @__PURE__ */ React.createElement("div", { className: "stock-card__body" }, /* @__PURE__ */ React.createElement(
+        Sparkline,
+        {
+          prices: stock.prices,
+          dates: stock.dates,
+          sma30: stock.sma30,
+          sma90: stock.sma90,
+          highlightIdx: signal.bottom.isBottom ? bottomIdxGlobal : null,
+          granvilleSignals
+        }
+      ), /* @__PURE__ */ React.createElement("div", { className: "stock-card__stats" }, /* @__PURE__ */ React.createElement("div", { className: "stat" }, /* @__PURE__ */ React.createElement("span", { className: "stat__label" }, "\u682A\u4FA1"), /* @__PURE__ */ React.createElement("span", { className: "stat__value mono" }, "\xA5", stock.latestPrice.toLocaleString())), /* @__PURE__ */ React.createElement("div", { className: "stat" }, /* @__PURE__ */ React.createElement("span", { className: "stat__label" }, "\u914D\u5F53\u5229\u56DE\u308A"), /* @__PURE__ */ React.createElement("span", { className: "stat__value mono" }, stock.dividendYield.toFixed(1), "%")))),
+      /* @__PURE__ */ React.createElement(GranvilleSummary, { granvilleSignals }),
+      /* @__PURE__ */ React.createElement("div", { className: "stock-card__trends" }, /* @__PURE__ */ React.createElement(TrendChip, { label: "30\u65E5", value: signal.trends.d30 }), /* @__PURE__ */ React.createElement(TrendChip, { label: "60\u65E5", value: signal.trends.d60 }), /* @__PURE__ */ React.createElement(TrendChip, { label: "120\u65E5", value: signal.trends.d120 }), /* @__PURE__ */ React.createElement(TrendChip, { label: "180\u65E5", value: signal.trends.d180 }), /* @__PURE__ */ React.createElement(TrendChip, { label: "365\u65E5", value: signal.trends.d365 })),
+      signal.bottom.isBottom && /* @__PURE__ */ React.createElement("div", { className: "stock-card__bottom-flag" }, "\u5E95\u5024\u30B7\u30B0\u30CA\u30EB\u691C\u77E5\uFF08", signal.bottom.daysSinceMin, "\u65E5\u524D\u306B\u6975\u5C0F\u5024\uFF09")
+    );
   }
-  function DetailModal({ stock, onClose }) {
+  function DetailModal({ stock, onClose, isFavorite, onToggleFavorite }) {
     if (!stock) return null;
     const { signal, granvilleSignals } = stock;
     const buyCount = granvilleSignals ? granvilleSignals.filter((s) => s === "buy").length : 0;
     const sellCount = granvilleSignals ? granvilleSignals.filter((s) => s === "sell").length : 0;
-    return /* @__PURE__ */ React.createElement("div", { className: "modal-backdrop", onClick: onClose }, /* @__PURE__ */ React.createElement("div", { className: "modal", onClick: (e) => e.stopPropagation() }, /* @__PURE__ */ React.createElement("div", { className: "modal__header" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { className: "modal__name" }, stock.name), /* @__PURE__ */ React.createElement("div", { className: "modal__meta" }, stock.code, " \u30FB ", stock.index, " \u30FB ", stock.sector)), /* @__PURE__ */ React.createElement("button", { className: "modal__close", onClick: onClose, "aria-label": "\u9589\u3058\u308B" }, "\u2715")), /* @__PURE__ */ React.createElement("div", { className: "modal__hero" }, /* @__PURE__ */ React.createElement(
+    return /* @__PURE__ */ React.createElement("div", { className: "modal-backdrop", onClick: onClose }, /* @__PURE__ */ React.createElement("div", { className: "modal", onClick: (e) => e.stopPropagation() }, /* @__PURE__ */ React.createElement("div", { className: "modal__header" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { className: "modal__name" }, stock.name), /* @__PURE__ */ React.createElement("div", { className: "modal__meta" }, stock.code, " \u30FB ", stock.index, " \u30FB ", stock.sector)), /* @__PURE__ */ React.createElement("div", { className: "modal__header-actions" }, /* @__PURE__ */ React.createElement(
+      "button",
+      {
+        type: "button",
+        className: `modal__favorite ${isFavorite ? "modal__favorite--active" : ""}`,
+        onClick: () => onToggleFavorite(stock.code),
+        "aria-label": isFavorite ? "\u304A\u6C17\u306B\u5165\u308A\u304B\u3089\u5916\u3059" : "\u304A\u6C17\u306B\u5165\u308A\u306B\u8FFD\u52A0"
+      },
+      isFavorite ? "\u2605" : "\u2606"
+    ), /* @__PURE__ */ React.createElement("button", { className: "modal__close", onClick: onClose, "aria-label": "\u9589\u3058\u308B" }, "\u2715"))), /* @__PURE__ */ React.createElement("div", { className: "modal__hero" }, /* @__PURE__ */ React.createElement(
       Sparkline,
       {
         prices: stock.prices,
@@ -327,6 +397,7 @@
   }
   function App() {
     const { status, stocks: dataset, generatedAt, errorMessage } = useStockData();
+    const { favorites, toggleFavorite } = useFavorites();
     const [indexFilter, setIndexFilter] = useState("\u3059\u3079\u3066");
     const [sectorFilter, setSectorFilter] = useState("\u3059\u3079\u3066");
     const [sortKey, setSortKey] = useState("score");
@@ -349,10 +420,22 @@
         if (sortKey === "score") return b.signal.score - a.signal.score;
         if (sortKey === "dividend") return b.dividendYield - a.dividendYield;
         if (sortKey === "price") return b.latestPrice - a.latestPrice;
+        if (sortKey === "signalRecency") {
+          if (!a.latestSignalDate && !b.latestSignalDate) return 0;
+          if (!a.latestSignalDate) return 1;
+          if (!b.latestSignalDate) return -1;
+          return b.latestSignalDate.localeCompare(a.latestSignalDate);
+        }
+        if (sortKey === "favorite") {
+          const aFav = favorites.has(a.code) ? 1 : 0;
+          const bFav = favorites.has(b.code) ? 1 : 0;
+          if (aFav !== bFav) return bFav - aFav;
+          return b.signal.score - a.signal.score;
+        }
         return 0;
       });
       return list;
-    }, [dataset, indexFilter, sectorFilter, sortKey]);
+    }, [dataset, indexFilter, sectorFilter, sortKey, favorites]);
     if (status === "loading") {
       return /* @__PURE__ */ React.createElement("div", { className: "app" }, /* @__PURE__ */ React.createElement("style", null, STYLES), /* @__PURE__ */ React.createElement("div", { className: "state-screen" }, /* @__PURE__ */ React.createElement("div", { className: "state-screen__spinner" }), /* @__PURE__ */ React.createElement("p", null, "\u682A\u4FA1\u30C7\u30FC\u30BF\u3092\u8AAD\u307F\u8FBC\u3093\u3067\u3044\u307E\u3059\u2026")));
     }
@@ -384,7 +467,7 @@
         onClick: () => setSectorFilter(sec)
       },
       sec
-    )))), /* @__PURE__ */ React.createElement("div", { className: "filter-group" }, /* @__PURE__ */ React.createElement("span", { className: "filter-group__label" }, "\u4E26\u3073\u66FF\u3048"), /* @__PURE__ */ React.createElement("div", { className: "chip-row" }, /* @__PURE__ */ React.createElement(
+    )))), /* @__PURE__ */ React.createElement("div", { className: "filter-group" }, /* @__PURE__ */ React.createElement("span", { className: "filter-group__label" }, "\u4E26\u3073\u66FF\u3048"), /* @__PURE__ */ React.createElement("div", { className: "chip-row chip-row--wrap" }, /* @__PURE__ */ React.createElement(
       "button",
       {
         className: `chip chip--sm ${sortKey === "score" ? "chip--active" : ""}`,
@@ -405,7 +488,38 @@
         onClick: () => setSortKey("price")
       },
       "\u682A\u4FA1"
-    )))), /* @__PURE__ */ React.createElement("main", { className: "stock-grid", ref: listRef }, filtered.map((s) => /* @__PURE__ */ React.createElement(StockCard, { key: s.code, stock: s, onOpen: setSelected })), filtered.length === 0 && /* @__PURE__ */ React.createElement("p", { className: "empty-state" }, "\u8A72\u5F53\u3059\u308B\u9298\u67C4\u304C\u3042\u308A\u307E\u305B\u3093\u3002")), /* @__PURE__ */ React.createElement("footer", { className: "app-footer" }, /* @__PURE__ */ React.createElement("p", null, "\u6700\u7D42\u66F4\u65B0: ", generatedAt ? formatDateFull(generatedAt) : "\u53D6\u5F97\u4E2D", "\uFF08\u5E73\u65E5\u306ETSE\u5F15\u3051\u5F8C\u306B\u81EA\u52D5\u66F4\u65B0\u3055\u308C\u307E\u3059\uFF09")), /* @__PURE__ */ React.createElement(DetailModal, { stock: selected, onClose: () => setSelected(null) }));
+    ), /* @__PURE__ */ React.createElement(
+      "button",
+      {
+        className: `chip chip--sm ${sortKey === "signalRecency" ? "chip--active" : ""}`,
+        onClick: () => setSortKey("signalRecency")
+      },
+      "\u30B7\u30B0\u30CA\u30EB\u65E5\u304C\u8FD1\u3044\u9806"
+    ), /* @__PURE__ */ React.createElement(
+      "button",
+      {
+        className: `chip chip--sm ${sortKey === "favorite" ? "chip--active" : ""}`,
+        onClick: () => setSortKey("favorite")
+      },
+      "\u2B50 \u304A\u6C17\u306B\u5165\u308A\u9806"
+    )))), /* @__PURE__ */ React.createElement("main", { className: "stock-grid", ref: listRef }, filtered.map((s) => /* @__PURE__ */ React.createElement(
+      StockCard,
+      {
+        key: s.code,
+        stock: s,
+        onOpen: setSelected,
+        isFavorite: favorites.has(s.code),
+        onToggleFavorite: toggleFavorite
+      }
+    )), filtered.length === 0 && /* @__PURE__ */ React.createElement("p", { className: "empty-state" }, "\u8A72\u5F53\u3059\u308B\u9298\u67C4\u304C\u3042\u308A\u307E\u305B\u3093\u3002")), /* @__PURE__ */ React.createElement("footer", { className: "app-footer" }, /* @__PURE__ */ React.createElement("p", null, "\u6700\u7D42\u66F4\u65B0: ", generatedAt ? formatDateFull(generatedAt) : "\u53D6\u5F97\u4E2D", "\uFF08\u5E73\u65E5\u306ETSE\u5F15\u3051\u5F8C\u306B\u81EA\u52D5\u66F4\u65B0\u3055\u308C\u307E\u3059\uFF09")), /* @__PURE__ */ React.createElement(
+      DetailModal,
+      {
+        stock: selected,
+        onClose: () => setSelected(null),
+        isFavorite: selected ? favorites.has(selected.code) : false,
+        onToggleFavorite: toggleFavorite
+      }
+    ));
   }
   var STYLES = `
 :root {
@@ -768,6 +882,7 @@
 }
 
 .stock-card {
+  position: relative;
   text-align: left;
   background: var(--card);
   border: 1px solid var(--card-border);
@@ -785,11 +900,30 @@
 .stock-card:active { transform: scale(0.99); }
 .stock-card:hover { border-color: #2A3742; }
 
+.stock-card__favorite {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 4px;
+  z-index: 2;
+}
+
+.stock-card__favorite--active {
+  color: var(--amber);
+}
+
 .stock-card__top {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   gap: 8px;
+  padding-right: 26px;
 }
 
 .stock-card__badges {
@@ -1117,6 +1251,26 @@
   font-size: 16px;
   cursor: pointer;
   padding: 4px;
+}
+
+.modal__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modal__favorite {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.modal__favorite--active {
+  color: var(--amber);
 }
 
 .modal__hero {
