@@ -3,3 +3,6 @@ flask-cors==4.0.1
 gunicorn==22.0.0
 yfinance>=0.2.65
 curl_cffi>=0.7.0
+prophet>=1.1.5
+pandas>=2.0
+numpy>=1.24
