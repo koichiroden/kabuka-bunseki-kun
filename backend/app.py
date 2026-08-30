@@ -9,6 +9,8 @@
 エンドポイント:
   GET /api/stocks       -> data/stocks.json の中身をそのまま返す
   GET /api/health       -> 生存確認・最終更新日時の確認用
+  GET /api/forecast     -> Prophetによる価格予測(tile10/25/50/75/90)を返す
+                           (株価売り時くん用に追加。prophet_forecast_endpoint.py参照)
 """
 
 import json
@@ -20,6 +22,10 @@ from flask_cors import CORS
 app = Flask(__name__)
 # フロントエンドを別ドメイン(Vercel等)でホストする想定なのでCORSを許可
 CORS(app)
+
+# 株価売り時くん用のProphet予測エンドポイント(/api/forecast)を登録
+from prophet_forecast_endpoint import forecast_bp
+app.register_blueprint(forecast_bp)
 
 DATA_PATH = Path(__file__).parent / "data" / "stocks.json"
 
