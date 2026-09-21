@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-18T20:49:22.667391+09:00",
+  "generatedAt": "2026-09-21T22:23:21.936643+09:00",
   "stocks": [
     {
       "code": "4151",
@@ -741,7 +741,7 @@
         2256.0
       ],
       "latestPrice": 2256.0,
-      "dividendYield": 3.09,
+      "dividendYield": 3.1,
       "sma30": [
         null,
         null,
@@ -2684,7 +2684,7 @@
         5968.0
       ],
       "latestPrice": 5968.0,
-      "dividendYield": 3.43,
+      "dividendYield": 3.42,
       "sma30": [
         null,
         null,
@@ -4627,7 +4627,7 @@
         2383.5
       ],
       "latestPrice": 2383.5,
-      "dividendYield": 3.38,
+      "dividendYield": 3.36,
       "sma30": [
         null,
         null,
@@ -8513,7 +8513,7 @@
         2954.5
       ],
       "latestPrice": 2954.5,
-      "dividendYield": 2.55,
+      "dividendYield": 2.57,
       "sma30": [
         null,
         null,
@@ -10456,7 +10456,7 @@
         6746.0
       ],
       "latestPrice": 6746.0,
-      "dividendYield": 1.97,
+      "dividendYield": 1.96,
       "sma30": [
         null,
         null,
@@ -12399,7 +12399,7 @@
         4930.0
       ],
       "latestPrice": 4930.0,
-      "dividendYield": 3.23,
+      "dividendYield": 3.25,
       "sma30": [
         null,
         null,
@@ -14033,7 +14033,7 @@
         3408.3,
         3366.4,
         3368.3,
-        3296.2,
+        3296.1,
         3225.9,
         3218.1,
         3281.5,
@@ -14342,7 +14342,7 @@
         2953.5
       ],
       "latestPrice": 2953.5,
-      "dividendYield": 3.41,
+      "dividendYield": 3.39,
       "sma30": [
         null,
         null,
@@ -14404,13 +14404,13 @@
         3531.24,
         3523.86,
         3516.09,
-        3517.46,
+        3517.45,
         3512.51,
-        3512.19,
+        3512.18,
         3510.17,
         3505.07,
         3494.24,
-        3482.74,
+        3482.73,
         3468.63,
         3451.5,
         3433.91,
@@ -14418,9 +14418,9 @@
         3391.0,
         3368.15,
         3345.92,
-        3326.94,
+        3326.93,
         3311.4,
-        3301.91,
+        3301.9,
         3294.69,
         3295.99,
         3299.66,
@@ -14428,10 +14428,10 @@
         3297.48,
         3299.14,
         3299.76,
-        3304.41,
-        3309.19,
+        3304.4,
+        3309.18,
         3315.72,
-        3324.37,
+        3324.36,
         3334.05,
         3344.2,
         3352.84,
@@ -14803,15 +14803,15 @@
         3403.27,
         3401.88,
         3401.35,
-        3400.61,
+        3400.6,
         3401.03,
         3399.33,
         3399.36,
         3398.7,
-        3399.31,
-        3403.72,
+        3399.3,
+        3403.71,
         3410.29,
-        3419.41,
+        3419.4,
         3423.97,
         3430.41,
         3436.29,
@@ -14846,7 +14846,7 @@
         3458.23,
         3460.7,
         3464.83,
-        3468.04,
+        3468.03,
         3470.68,
         3474.87,
         3481.27,
@@ -14856,7 +14856,7 @@
         3505.09,
         3510.44,
         3516.24,
-        3522.22,
+        3522.21,
         3528.43,
         3533.38,
         3538.88,
@@ -16285,7 +16285,7 @@
         11120.0
       ],
       "latestPrice": 11120.0,
-      "dividendYield": 1.78,
+      "dividendYield": 1.8,
       "sma30": [
         null,
         null,
@@ -20171,7 +20171,7 @@
         19555.0
       ],
       "latestPrice": 19555.0,
-      "dividendYield": 11.0,
+      "dividendYield": 10.0,
       "sma30": [
         null,
         null,
@@ -24057,7 +24057,7 @@
         5524.0
       ],
       "latestPrice": 5524.0,
-      "dividendYield": 1.02,
+      "dividendYield": 1.01,
       "sma30": [
         null,
         null,
@@ -26000,7 +26000,7 @@
         5126.0
       ],
       "latestPrice": 5126.0,
-      "dividendYield": 1.16,
+      "dividendYield": 1.17,
       "sma30": [
         null,
         null,
@@ -27943,7 +27943,7 @@
         13075.0
       ],
       "latestPrice": 13075.0,
-      "dividendYield": 1.66,
+      "dividendYield": 1.64,
       "sma30": [
         null,
         null,
@@ -29886,7 +29886,7 @@
         4383.0
       ],
       "latestPrice": 4383.0,
-      "dividendYield": 1.67,
+      "dividendYield": 1.64,
       "sma30": [
         null,
         null,
@@ -31829,7 +31829,7 @@
         2000.0
       ],
       "latestPrice": 2000.0,
-      "dividendYield": 2.54,
+      "dividendYield": 2.5,
       "sma30": [
         null,
         null,
@@ -33772,7 +33772,7 @@
         6168.0
       ],
       "latestPrice": 6168.0,
-      "dividendYield": 1.71,
+      "dividendYield": 1.69,
       "sma30": [
         null,
         null,
@@ -35715,7 +35715,7 @@
         4812.0
       ],
       "latestPrice": 4812.0,
-      "dividendYield": 82.0,
+      "dividendYield": 83.0,
       "sma30": [
         null,
         null,
@@ -37658,7 +37658,7 @@
         3979.0
       ],
       "latestPrice": 3979.0,
-      "dividendYield": 1.37,
+      "dividendYield": 1.38,
       "sma30": [
         null,
         null,
@@ -39601,7 +39601,7 @@
         3309.0
       ],
       "latestPrice": 3309.0,
-      "dividendYield": 88.0,
+      "dividendYield": 85.0,
       "sma30": [
         null,
         null,
@@ -41544,7 +41544,7 @@
         3144.0
       ],
       "latestPrice": 3144.0,
-      "dividendYield": 2.52,
+      "dividendYield": 2.54,
       "sma30": [
         null,
         null,
@@ -43487,7 +43487,7 @@
         4287.0
       ],
       "latestPrice": 4287.0,
-      "dividendYield": 1.27,
+      "dividendYield": 1.26,
       "sma30": [
         null,
         null,
@@ -47373,7 +47373,7 @@
         3697.0
       ],
       "latestPrice": 3697.0,
-      "dividendYield": 93.0,
+      "dividendYield": 95.0,
       "sma30": [
         null,
         null,
@@ -49316,7 +49316,7 @@
         2845.0
       ],
       "latestPrice": 2845.0,
-      "dividendYield": 1.43,
+      "dividendYield": 1.41,
       "sma30": [
         null,
         null,
@@ -51259,7 +51259,7 @@
         2218.0
       ],
       "latestPrice": 2218.0,
-      "dividendYield": 2.83,
+      "dividendYield": 2.89,
       "sma30": [
         null,
         null,
@@ -53202,7 +53202,7 @@
         4652.0
       ],
       "latestPrice": 4652.0,
-      "dividendYield": 1.96,
+      "dividendYield": 1.98,
       "sma30": [
         null,
         null,
@@ -55145,7 +55145,7 @@
         32050.0
       ],
       "latestPrice": 32050.0,
-      "dividendYield": 20.0,
+      "dividendYield": 19.0,
       "sma30": [
         null,
         null,
@@ -59031,7 +59031,7 @@
         1915.0
       ],
       "latestPrice": 1915.0,
-      "dividendYield": 3.81,
+      "dividendYield": 3.86,
       "sma30": [
         null,
         null,
@@ -60974,7 +60974,7 @@
         39090.0
       ],
       "latestPrice": 39090.0,
-      "dividendYield": 1.17,
+      "dividendYield": 1.08,
       "sma30": [
         null,
         null,
@@ -62917,7 +62917,7 @@
         5852.0
       ],
       "latestPrice": 5852.0,
-      "dividendYield": 1.85,
+      "dividendYield": 1.83,
       "sma30": [
         null,
         null,
@@ -64860,7 +64860,7 @@
         4648.0
       ],
       "latestPrice": 4648.0,
-      "dividendYield": 1.12,
+      "dividendYield": 1.08,
       "sma30": [
         null,
         null,
@@ -66803,7 +66803,7 @@
         3637.0
       ],
       "latestPrice": 3637.0,
-      "dividendYield": 1.57,
+      "dividendYield": 1.54,
       "sma30": [
         null,
         null,
@@ -68746,7 +68746,7 @@
         9375.0
       ],
       "latestPrice": 9375.0,
-      "dividendYield": 1.0,
+      "dividendYield": 96.0,
       "sma30": [
         null,
         null,
@@ -70689,7 +70689,7 @@
         7763.0
       ],
       "latestPrice": 7763.0,
-      "dividendYield": 94.0,
+      "dividendYield": 90.0,
       "sma30": [
         null,
         null,
@@ -72632,7 +72632,7 @@
         12805.0
       ],
       "latestPrice": 12805.0,
-      "dividendYield": 2.0,
+      "dividendYield": 1.92,
       "sma30": [
         null,
         null,
@@ -74575,7 +74575,7 @@
         4503.0
       ],
       "latestPrice": 4503.0,
-      "dividendYield": 3.53,
+      "dividendYield": 3.55,
       "sma30": [
         null,
         null,
@@ -76518,7 +76518,7 @@
         1660.5
       ],
       "latestPrice": 1660.5,
-      "dividendYield": 2.62,
+      "dividendYield": 2.65,
       "sma30": [
         null,
         null,
@@ -78461,7 +78461,7 @@
         53110.0
       ],
       "latestPrice": 53110.0,
-      "dividendYield": 1.47,
+      "dividendYield": 1.41,
       "sma30": [
         null,
         null,
@@ -80404,7 +80404,7 @@
         284.0
       ],
       "latestPrice": 284.0,
-      "dividendYield": 2.84,
+      "dividendYield": 2.82,
       "sma30": [
         null,
         null,
@@ -84290,7 +84290,7 @@
         2210.5
       ],
       "latestPrice": 2210.5,
-      "dividendYield": 4.22,
+      "dividendYield": 4.25,
       "sma30": [
         null,
         null,
@@ -86233,7 +86233,7 @@
         3025.0
       ],
       "latestPrice": 3025.0,
-      "dividendYield": 3.3,
+      "dividendYield": 3.31,
       "sma30": [
         null,
         null,
@@ -88176,7 +88176,7 @@
         368.6
       ],
       "latestPrice": 368.6,
-      "dividendYield": 2.67,
+      "dividendYield": 2.71,
       "sma30": [
         null,
         null,
@@ -90119,7 +90119,7 @@
         1157.0
       ],
       "latestPrice": 1157.0,
-      "dividendYield": 4.69,
+      "dividendYield": 4.75,
       "sma30": [
         null,
         null,
@@ -92062,7 +92062,7 @@
         1689.0
       ],
       "latestPrice": 1689.0,
-      "dividendYield": 4.1,
+      "dividendYield": 4.14,
       "sma30": [
         null,
         null,
@@ -94005,7 +94005,7 @@
         2028.0
       ],
       "latestPrice": 2028.0,
-      "dividendYield": 2.54,
+      "dividendYield": 2.56,
       "sma30": [
         null,
         null,
@@ -95948,7 +95948,7 @@
         2632.5
       ],
       "latestPrice": 2632.5,
-      "dividendYield": 4.32,
+      "dividendYield": 4.41,
       "sma30": [
         null,
         null,
@@ -97891,7 +97891,7 @@
         1821.0
       ],
       "latestPrice": 1821.0,
-      "dividendYield": 2.73,
+      "dividendYield": 2.75,
       "sma30": [
         null,
         null,
@@ -99834,7 +99834,7 @@
         2238.0
       ],
       "latestPrice": 2238.0,
-      "dividendYield": 1.57,
+      "dividendYield": 1.61,
       "sma30": [
         null,
         null,
@@ -101777,7 +101777,7 @@
         641.2
       ],
       "latestPrice": 641.2,
-      "dividendYield": 2.75,
+      "dividendYield": 2.81,
       "sma30": [
         null,
         null,
@@ -103720,7 +103720,7 @@
         52420.0
       ],
       "latestPrice": 52420.0,
-      "dividendYield": 1.08,
+      "dividendYield": 1.04,
       "sma30": [
         null,
         null,
@@ -107606,7 +107606,7 @@
         2005.0
       ],
       "latestPrice": 2005.0,
-      "dividendYield": 1.48,
+      "dividendYield": 1.5,
       "sma30": [
         null,
         null,
@@ -109204,7 +109204,7 @@
         15407.8,
         15832.5,
         15926.3,
-        16341.1,
+        16341.2,
         16410.3,
         16573.3,
         17338.7,
@@ -109213,7 +109213,7 @@
         17590.6,
         17501.7,
         17511.5,
-        18000.5,
+        18000.4,
         17719.0,
         17783.2,
         17595.5,
@@ -109252,7 +109252,7 @@
         16375.7,
         16721.4,
         16430.0,
-        16341.1,
+        16341.2,
         16830.1,
         17012.8,
         17560.9,
@@ -109549,7 +109549,7 @@
         22605.0
       ],
       "latestPrice": 22605.0,
-      "dividendYield": 1.3,
+      "dividendYield": 1.31,
       "sma30": [
         null,
         null,
@@ -109624,22 +109624,22 @@
         16708.89,
         16679.76,
         16668.73,
-        16671.36,
-        16695.23,
-        16745.27,
+        16671.37,
+        16695.24,
+        16745.28,
         16795.15,
         16845.03,
         16906.76,
-        16967.5,
+        16967.51,
         17008.99,
-        17060.51,
+        17060.52,
         17136.4,
         17212.78,
         17306.45,
         17390.73,
         17468.43,
-        17535.42,
-        17550.4,
+        17535.43,
+        17550.41,
         17589.25,
         17631.56,
         17680.28,
@@ -109647,8 +109647,8 @@
         17813.45,
         17906.13,
         17994.2,
-        18079.79,
-        18171.81,
+        18079.8,
+        18171.82,
         18260.38,
         18362.44,
         18454.13,
@@ -110010,18 +110010,18 @@
         16912.57,
         16919.11,
         16931.18,
-        16943.85,
+        16943.86,
         16972.28,
         17008.33,
         17045.31,
         17084.16,
         17125.15,
-        17180.07,
+        17180.08,
         17231.32,
         17284.0,
         17324.82,
         17370.97,
-        17415.74,
+        17415.75,
         17455.03,
         17497.78,
         17539.59,
@@ -110029,7 +110029,7 @@
         17619.81,
         17660.96,
         17699.32,
-        17738.71,
+        17738.72,
         17782.28,
         17827.72,
         17869.36,
@@ -110052,17 +110052,17 @@
         18461.27,
         18517.61,
         18568.0,
-        18625.74,
+        18625.75,
         18683.46,
         18735.21,
         18789.62,
         18853.34,
         18917.0,
-        18983.0,
+        18983.01,
         19049.25,
         19115.5,
         19182.68,
-        19253.81,
+        19253.82,
         19341.77,
         19423.0,
         19498.25,
@@ -111492,7 +111492,7 @@
         177.3
       ],
       "latestPrice": 177.3,
-      "dividendYield": 3.0,
+      "dividendYield": 3.05,
       "sma30": [
         null,
         null,
@@ -113435,7 +113435,7 @@
         3060.0
       ],
       "latestPrice": 3060.0,
-      "dividendYield": 2.7,
+      "dividendYield": 2.75,
       "sma30": [
         null,
         null,
@@ -115378,7 +115378,7 @@
         248.1
       ],
       "latestPrice": 248.1,
-      "dividendYield": 3.5,
+      "dividendYield": 3.55,
       "sma30": [
         null,
         null,
@@ -117321,7 +117321,7 @@
         6315.0
       ],
       "latestPrice": 6315.0,
-      "dividendYield": 18.0,
+      "dividendYield": 17.0,
       "sma30": [
         null,
         null,
@@ -119264,7 +119264,7 @@
         3489.0
       ],
       "latestPrice": 3489.0,
-      "dividendYield": 3.08,
+      "dividendYield": 3.1,
       "sma30": [
         null,
         null,
@@ -121207,7 +121207,7 @@
         1887.0
       ],
       "latestPrice": 1887.0,
-      "dividendYield": 2.53,
+      "dividendYield": 2.54,
       "sma30": [
         null,
         null,
@@ -123150,7 +123150,7 @@
         3486.0
       ],
       "latestPrice": 3486.0,
-      "dividendYield": 2.67,
+      "dividendYield": 2.7,
       "sma30": [
         null,
         null,
@@ -125093,7 +125093,7 @@
         3620.0
       ],
       "latestPrice": 3620.0,
-      "dividendYield": 2.63,
+      "dividendYield": 2.65,
       "sma30": [
         null,
         null,
@@ -127036,7 +127036,7 @@
         2451.5
       ],
       "latestPrice": 2451.5,
-      "dividendYield": 1.49,
+      "dividendYield": 1.51,
       "sma30": [
         null,
         null,
@@ -128979,7 +128979,7 @@
         1768.5
       ],
       "latestPrice": 1768.5,
-      "dividendYield": 2.65,
+      "dividendYield": 2.69,
       "sma30": [
         null,
         null,
@@ -130922,7 +130922,7 @@
         6830.0
       ],
       "latestPrice": 6830.0,
-      "dividendYield": 1.31,
+      "dividendYield": 1.32,
       "sma30": [
         null,
         null,
@@ -132865,7 +132865,7 @@
         2737.0
       ],
       "latestPrice": 2737.0,
-      "dividendYield": 2.32,
+      "dividendYield": 2.34,
       "sma30": [
         null,
         null,
@@ -134808,7 +134808,7 @@
         7746.0
       ],
       "latestPrice": 7746.0,
-      "dividendYield": 2.7,
+      "dividendYield": 2.71,
       "sma30": [
         null,
         null,
@@ -136751,7 +136751,7 @@
         8495.0
       ],
       "latestPrice": 8495.0,
-      "dividendYield": 1.75,
+      "dividendYield": 1.77,
       "sma30": [
         null,
         null,
@@ -138694,7 +138694,7 @@
         4643.0
       ],
       "latestPrice": 4643.0,
-      "dividendYield": 3.41,
+      "dividendYield": 3.45,
       "sma30": [
         null,
         null,
@@ -140637,7 +140637,7 @@
         6146.0
       ],
       "latestPrice": 6146.0,
-      "dividendYield": 2.73,
+      "dividendYield": 2.76,
       "sma30": [
         null,
         null,
@@ -142580,7 +142580,7 @@
         2235.5
       ],
       "latestPrice": 2235.5,
-      "dividendYield": 3.46,
+      "dividendYield": 3.49,
       "sma30": [
         null,
         null,
@@ -144523,7 +144523,7 @@
         1845.5
       ],
       "latestPrice": 1845.5,
-      "dividendYield": 3.83,
+      "dividendYield": 3.79,
       "sma30": [
         null,
         null,
@@ -146466,7 +146466,7 @@
         1581.0
       ],
       "latestPrice": 1581.0,
-      "dividendYield": 3.21,
+      "dividendYield": 3.23,
       "sma30": [
         null,
         null,
@@ -148409,7 +148409,7 @@
         6891.0
       ],
       "latestPrice": 6891.0,
-      "dividendYield": 2.86,
+      "dividendYield": 2.9,
       "sma30": [
         null,
         null,
@@ -150352,7 +150352,7 @@
         5217.0
       ],
       "latestPrice": 5217.0,
-      "dividendYield": 2.66,
+      "dividendYield": 2.68,
       "sma30": [
         null,
         null,
@@ -152295,7 +152295,7 @@
         1913.5
       ],
       "latestPrice": 1913.5,
-      "dividendYield": 3.73,
+      "dividendYield": 3.76,
       "sma30": [
         null,
         null,
@@ -154238,7 +154238,7 @@
         8200.0
       ],
       "latestPrice": 8200.0,
-      "dividendYield": 1.57,
+      "dividendYield": 1.59,
       "sma30": [
         null,
         null,
@@ -156181,7 +156181,7 @@
         4952.0
       ],
       "latestPrice": 4952.0,
-      "dividendYield": 3.25,
+      "dividendYield": 3.31,
       "sma30": [
         null,
         null,
@@ -158124,7 +158124,7 @@
         1163.0
       ],
       "latestPrice": 1163.0,
-      "dividendYield": 2.66,
+      "dividendYield": 2.75,
       "sma30": [
         null,
         null,
@@ -160067,7 +160067,7 @@
         1998.0
       ],
       "latestPrice": 1998.0,
-      "dividendYield": 3.12,
+      "dividendYield": 3.25,
       "sma30": [
         null,
         null,
@@ -162010,7 +162010,7 @@
         4356.0
       ],
       "latestPrice": 4356.0,
-      "dividendYield": 2.52,
+      "dividendYield": 2.53,
       "sma30": [
         null,
         null,
@@ -163953,7 +163953,7 @@
         6078.0
       ],
       "latestPrice": 6078.0,
-      "dividendYield": 2.86,
+      "dividendYield": 2.96,
       "sma30": [
         null,
         null,
@@ -165896,7 +165896,7 @@
         1848.0
       ],
       "latestPrice": 1848.0,
-      "dividendYield": 2.1,
+      "dividendYield": 2.16,
       "sma30": [
         null,
         null,
@@ -167839,7 +167839,7 @@
         1610.0
       ],
       "latestPrice": 1610.0,
-      "dividendYield": 3.77,
+      "dividendYield": 3.85,
       "sma30": [
         null,
         null,
@@ -169782,7 +169782,7 @@
         2848.5
       ],
       "latestPrice": 2848.5,
-      "dividendYield": 2.63,
+      "dividendYield": 2.67,
       "sma30": [
         null,
         null,
@@ -171725,7 +171725,7 @@
         1655.0
       ],
       "latestPrice": 1655.0,
-      "dividendYield": 1.48,
+      "dividendYield": 1.51,
       "sma30": [
         null,
         null,
@@ -173668,7 +173668,7 @@
         4904.0
       ],
       "latestPrice": 4904.0,
-      "dividendYield": 1.01,
+      "dividendYield": 1.02,
       "sma30": [
         null,
         null,
@@ -175611,7 +175611,7 @@
         2210.0
       ],
       "latestPrice": 2210.0,
-      "dividendYield": 3.32,
+      "dividendYield": 3.35,
       "sma30": [
         null,
         null,
@@ -177554,7 +177554,7 @@
         6886.0
       ],
       "latestPrice": 6886.0,
-      "dividendYield": 3.93,
+      "dividendYield": 3.95,
       "sma30": [
         null,
         null,
@@ -179497,7 +179497,7 @@
         2667.0
       ],
       "latestPrice": 2667.0,
-      "dividendYield": 2.07,
+      "dividendYield": 2.1,
       "sma30": [
         null,
         null,
@@ -181440,7 +181440,7 @@
         1162.0
       ],
       "latestPrice": 1162.0,
-      "dividendYield": 3.45,
+      "dividendYield": 3.44,
       "sma30": [
         null,
         null,
@@ -185326,7 +185326,7 @@
         2020.0
       ],
       "latestPrice": 2020.0,
-      "dividendYield": 2.92,
+      "dividendYield": 2.97,
       "sma30": [
         null,
         null,
@@ -189212,7 +189212,7 @@
         713.0
       ],
       "latestPrice": 713.0,
-      "dividendYield": 1.38,
+      "dividendYield": 1.4,
       "sma30": [
         null,
         null,
@@ -191155,7 +191155,7 @@
         2117.0
       ],
       "latestPrice": 2117.0,
-      "dividendYield": 1.87,
+      "dividendYield": 1.89,
       "sma30": [
         null,
         null,
@@ -193098,7 +193098,7 @@
         2882.5
       ],
       "latestPrice": 2882.5,
-      "dividendYield": 4.57,
+      "dividendYield": 4.65,
       "sma30": [
         null,
         null,
@@ -195041,7 +195041,7 @@
         1313.5
       ],
       "latestPrice": 1313.5,
-      "dividendYield": 1.04,
+      "dividendYield": 1.07,
       "sma30": [
         null,
         null,
@@ -196984,7 +196984,7 @@
         3030.0
       ],
       "latestPrice": 3030.0,
-      "dividendYield": 1.03,
+      "dividendYield": 1.06,
       "sma30": [
         null,
         null,
@@ -198584,7 +198584,7 @@
         45573.7,
         46066.4,
         47258.7,
-        46293.0,
+        46293.1,
         46371.9,
         47288.3,
         46687.2,
@@ -198958,31 +198958,31 @@
         null,
         null,
         null,
-        45298.8,
-        45379.6,
+        45298.81,
+        45379.61,
         45478.14,
-        45583.9,
-        45720.54,
+        45583.91,
+        45720.55,
         45870.32,
         45948.17,
         46037.18,
         46112.07,
-        46276.62,
+        46276.63,
         46383.7,
         46532.82,
-        46559.42,
-        46617.56,
-        46722.34,
-        46786.39,
+        46559.43,
+        46617.57,
+        46722.35,
+        46786.4,
         46850.12,
         46928.62,
-        46994.31,
+        46994.32,
         47074.46,
         47169.05,
-        47248.86,
-        47325.72,
-        47380.9,
-        47355.28,
+        47248.87,
+        47325.73,
+        47380.91,
+        47355.29,
         47336.89,
         47331.63,
         47279.41,
@@ -199389,13 +199389,13 @@
         46121.48,
         46107.14,
         46100.68,
-        46124.98,
+        46124.99,
         46165.28,
         46193.09,
         46215.75,
         46263.27,
         46353.26,
-        46412.71,
+        46412.72,
         46482.35,
         46508.08,
         46539.94,
@@ -199403,7 +199403,7 @@
         46589.32,
         46605.41,
         46622.38,
-        46619.17,
+        46619.18,
         46621.53,
         46629.81,
         46634.5,
@@ -200870,7 +200870,7 @@
         1773.0
       ],
       "latestPrice": 1773.0,
-      "dividendYield": 1.22,
+      "dividendYield": 1.24,
       "sma30": [
         null,
         null,
@@ -202813,7 +202813,7 @@
         2545.5
       ],
       "latestPrice": 2545.5,
-      "dividendYield": 2.56,
+      "dividendYield": 2.59,
       "sma30": [
         null,
         null,
@@ -204756,7 +204756,7 @@
         3200.0
       ],
       "latestPrice": 3200.0,
-      "dividendYield": 1.92,
+      "dividendYield": 1.88,
       "sma30": [
         null,
         null,
@@ -214471,7 +214471,7 @@
         3035.0
       ],
       "latestPrice": 3035.0,
-      "dividendYield": 52.0,
+      "dividendYield": 53.0,
       "sma30": [
         null,
         null,
@@ -216414,7 +216414,7 @@
         536.8
       ],
       "latestPrice": 536.8,
-      "dividendYield": 1.99,
+      "dividendYield": 2.05,
       "sma30": [
         null,
         null,
@@ -218357,7 +218357,7 @@
         6609.0
       ],
       "latestPrice": 6609.0,
-      "dividendYield": 2.87,
+      "dividendYield": 2.8,
       "sma30": [
         null,
         null,
@@ -220300,7 +220300,7 @@
         1260.0
       ],
       "latestPrice": 1260.0,
-      "dividendYield": 1.57,
+      "dividendYield": 1.59,
       "sma30": [
         null,
         null,
@@ -226129,7 +226129,7 @@
         2527.5
       ],
       "latestPrice": 2527.5,
-      "dividendYield": 2.36,
+      "dividendYield": 2.37,
       "sma30": [
         null,
         null,
@@ -227855,7 +227855,7 @@
         6958.3,
         6901.4,
         6921.0,
-        6876.9,
+        6877.0,
         6920.1,
         6750.6,
         6700.6,
@@ -228072,7 +228072,7 @@
         7932.0
       ],
       "latestPrice": 7932.0,
-      "dividendYield": 1.66,
+      "dividendYield": 1.64,
       "sma30": [
         null,
         null,
@@ -228224,12 +228224,12 @@
         8068.7,
         8024.06,
         7977.23,
-        7920.9,
+        7920.91,
         7864.71,
         7800.15,
-        7739.67,
-        7671.52,
-        7592.3,
+        7739.68,
+        7671.53,
+        7592.31,
         7530.49,
         7467.47,
         7414.67,
@@ -228239,20 +228239,20 @@
         7162.84,
         7103.83,
         7044.76,
-        6984.51,
+        6984.52,
         6928.35,
-        6878.71,
+        6878.72,
         6846.35,
         6810.56,
         6779.8,
         6754.79,
-        6728.69,
+        6728.7,
         6710.41,
         6678.96,
-        6641.21,
+        6641.22,
         6607.71,
         6593.28,
-        6580.18,
+        6580.19,
         6565.62,
         6547.66,
         6537.21,
@@ -228593,9 +228593,9 @@
         8003.12,
         8000.79,
         7998.84,
-        7993.55,
+        7993.56,
         7989.75,
-        7981.24,
+        7981.25,
         7970.92,
         7963.3,
         7958.55,
@@ -228612,7 +228612,7 @@
         7833.39,
         7814.09,
         7794.81,
-        7775.69,
+        7775.7,
         7755.21,
         7734.58,
         7713.5,
@@ -228627,17 +228627,17 @@
         7522.16,
         7500.9,
         7479.45,
-        7458.16,
+        7458.17,
         7437.8,
         7415.38,
-        7395.88,
+        7395.89,
         7375.9,
         7358.15,
         7337.86,
-        7317.89,
+        7317.9,
         7299.95,
         7282.23,
-        7262.82,
+        7262.83,
         7250.09,
         7230.78,
         7212.69,
@@ -228645,15 +228645,15 @@
         7172.86,
         7149.38,
         7125.32,
-        7100.68,
+        7100.69,
         7075.55,
         7053.41,
         7024.13,
-        6991.79,
-        6959.18,
+        6991.8,
+        6959.19,
         6924.22,
         6883.71,
-        6842.42,
+        6842.43,
         6800.3,
         6759.42,
         6717.9,
@@ -228664,7 +228664,7 @@
         6496.13,
         6446.86,
         6399.62,
-        6347.48,
+        6347.49,
         6298.54,
         6253.07,
         6211.05,
@@ -228677,10 +228677,10 @@
         5981.77,
         5950.63,
         5917.68,
-        5883.29,
-        5854.3,
+        5883.3,
+        5854.31,
         5825.95,
-        5797.84,
+        5797.85,
         5771.57,
         5744.33,
         5720.0,
@@ -230015,7 +230015,7 @@
         8339.0
       ],
       "latestPrice": 8339.0,
-      "dividendYield": 2.58,
+      "dividendYield": 2.63,
       "sma30": [
         null,
         null,
@@ -231958,7 +231958,7 @@
         1580.5
       ],
       "latestPrice": 1580.5,
-      "dividendYield": 1.36,
+      "dividendYield": 1.39,
       "sma30": [
         null,
         null,
@@ -233901,7 +233901,7 @@
         6436.0
       ],
       "latestPrice": 6436.0,
-      "dividendYield": 1.84,
+      "dividendYield": 1.86,
       "sma30": [
         null,
         null,
@@ -235519,7 +235519,7 @@
         19133.5,
         19994.0,
         20013.7,
-        19786.2,
+        19786.3,
         19855.5,
         19440.1,
         19667.6,
@@ -235844,7 +235844,7 @@
         21055.0
       ],
       "latestPrice": 21055.0,
-      "dividendYield": 1.05,
+      "dividendYield": 1.06,
       "sma30": [
         null,
         null,
@@ -235888,34 +235888,34 @@
         19167.42,
         19274.74,
         19320.89,
-        19377.1,
+        19377.11,
         19417.99,
-        19449.14,
+        19449.15,
         19484.59,
-        19504.2,
+        19504.21,
         19513.44,
-        19506.51,
+        19506.52,
         19502.06,
         19512.94,
-        19556.95,
-        19575.25,
+        19556.96,
+        19575.26,
         19594.87,
         19600.64,
-        19612.67,
+        19612.68,
         19629.82,
         19658.34,
         19709.77,
         19758.73,
         19848.57,
-        19952.58,
-        20069.62,
+        19952.59,
+        20069.63,
         20186.83,
-        20288.04,
-        20399.31,
+        20288.05,
+        20399.32,
         20512.89,
         20584.76,
         20630.59,
-        20668.99,
+        20669.0,
         20681.19,
         20690.59,
         20697.02,
@@ -236320,7 +236320,7 @@
         20792.02,
         20834.0,
         20869.66,
-        20896.8,
+        20896.81,
         20918.4,
         20942.19,
         20968.29,
@@ -236335,14 +236335,14 @@
         21162.75,
         21190.94,
         21216.82,
-        21242.59,
+        21242.6,
         21270.51,
         21286.5,
-        21306.33,
+        21306.34,
         21325.7,
         21353.16,
         21387.12,
-        21411.12,
+        21411.13,
         21430.81,
         21456.28,
         21484.12,
@@ -237787,7 +237787,7 @@
         3913.0
       ],
       "latestPrice": 3913.0,
-      "dividendYield": 2.85,
+      "dividendYield": 2.86,
       "sma30": [
         null,
         null,
@@ -239730,7 +239730,7 @@
         1692.0
       ],
       "latestPrice": 1692.0,
-      "dividendYield": 2.88,
+      "dividendYield": 2.96,
       "sma30": [
         null,
         null,
@@ -241673,7 +241673,7 @@
         1248.0
       ],
       "latestPrice": 1248.0,
-      "dividendYield": 1.81,
+      "dividendYield": 1.84,
       "sma30": [
         null,
         null,
@@ -243616,7 +243616,7 @@
         875.7
       ],
       "latestPrice": 875.7,
-      "dividendYield": 4.05,
+      "dividendYield": 4.11,
       "sma30": [
         null,
         null,
@@ -245559,7 +245559,7 @@
         1763.0
       ],
       "latestPrice": 1763.0,
-      "dividendYield": 2.97,
+      "dividendYield": 3.06,
       "sma30": [
         null,
         null,
@@ -247502,7 +247502,7 @@
         1600.0
       ],
       "latestPrice": 1600.0,
-      "dividendYield": 2.73,
+      "dividendYield": 2.75,
       "sma30": [
         null,
         null,
@@ -249445,7 +249445,7 @@
         13895.0
       ],
       "latestPrice": 13895.0,
-      "dividendYield": 48.0,
+      "dividendYield": 47.0,
       "sma30": [
         null,
         null,
@@ -251388,7 +251388,7 @@
         580.2
       ],
       "latestPrice": 580.2,
-      "dividendYield": 2.68,
+      "dividendYield": 2.76,
       "sma30": [
         null,
         null,
@@ -253021,7 +253021,7 @@
         4043.7,
         4083.4,
         4110.4,
-        4186.8,
+        4186.7,
         4061.1,
         4061.1,
         4080.5,
@@ -253032,7 +253032,7 @@
         4252.5,
         4169.4,
         4172.3,
-        4186.8,
+        4186.7,
         4162.6,
         4122.0,
         4113.3,
@@ -253331,7 +253331,7 @@
         8257.0
       ],
       "latestPrice": 8257.0,
-      "dividendYield": 2.59,
+      "dividendYield": 2.57,
       "sma30": [
         null,
         null,
@@ -253390,47 +253390,47 @@
         4100.79,
         4102.05,
         4101.02,
-        4104.08,
+        4104.07,
         4103.14,
-        4100.34,
-        4097.99,
+        4100.33,
+        4097.98,
         4094.86,
-        4095.22,
-        4099.28,
-        4105.27,
-        4112.55,
+        4095.21,
+        4099.27,
+        4105.26,
+        4112.54,
         4115.83,
         4116.99,
-        4118.77,
+        4118.76,
         4119.6,
-        4119.12,
+        4119.11,
         4117.73,
-        4125.85,
+        4125.84,
         4133.61,
-        4139.25,
+        4139.24,
         4147.59,
-        4157.19,
+        4157.18,
         4167.43,
         4184.37,
-        4201.54,
-        4217.55,
-        4234.33,
-        4252.04,
+        4201.53,
+        4217.54,
+        4234.32,
+        4252.03,
         4274.23,
-        4298.1,
+        4298.09,
         4320.06,
         4341.19,
-        4360.81,
+        4360.8,
         4385.51,
         4408.7,
-        4433.02,
-        4456.37,
+        4433.01,
+        4456.36,
         4482.97,
-        4513.73,
-        4545.36,
+        4513.72,
+        4545.35,
         4576.37,
         4611.12,
-        4647.81,
+        4647.8,
         4683.97,
         4721.04,
         4758.6,
@@ -253793,15 +253793,15 @@
         4188.83,
         4193.84,
         4200.24,
-        4209.24,
+        4209.23,
         4219.41,
         4230.64,
         4243.15,
-        4256.66,
+        4256.65,
         4273.37,
         4288.99,
         4305.34,
-        4319.25,
+        4319.24,
         4333.62,
         4347.14,
         4359.75,
@@ -253812,16 +253812,16 @@
         4422.63,
         4435.88,
         4448.55,
-        4461.18,
+        4461.17,
         4474.18,
         4486.5,
         4498.47,
         4509.5,
         4522.66,
         4536.56,
-        4549.43,
-        4562.11,
-        4572.34,
+        4549.42,
+        4562.1,
+        4572.33,
         4585.63,
         4598.63,
         4612.54,
@@ -253831,7 +253831,7 @@
         4664.33,
         4675.38,
         4687.33,
-        4700.0,
+        4699.99,
         4714.02,
         4727.08,
         4740.18,
@@ -253841,18 +253841,18 @@
         4788.55,
         4800.19,
         4812.44,
-        4824.28,
+        4824.27,
         4835.72,
         4848.31,
         4862.35,
         4875.65,
-        4887.54,
+        4887.53,
         4897.95,
         4910.21,
-        4921.82,
+        4921.81,
         4932.37,
         4942.27,
-        4950.95,
+        4950.94,
         4959.97,
         4969.08,
         4976.59,
@@ -255274,7 +255274,7 @@
         2599.5
       ],
       "latestPrice": 2599.5,
-      "dividendYield": 3.78,
+      "dividendYield": 3.85,
       "sma30": [
         null,
         null,
@@ -257217,7 +257217,7 @@
         4181.0
       ],
       "latestPrice": 4181.0,
-      "dividendYield": 3.43,
+      "dividendYield": 3.44,
       "sma30": [
         null,
         null,
@@ -259160,7 +259160,7 @@
         3309.0
       ],
       "latestPrice": 3309.0,
-      "dividendYield": 3.0,
+      "dividendYield": 3.02,
       "sma30": [
         null,
         null,
@@ -261103,7 +261103,7 @@
         5844.0
       ],
       "latestPrice": 5844.0,
-      "dividendYield": 2.01,
+      "dividendYield": 1.98,
       "sma30": [
         null,
         null,
@@ -263046,7 +263046,7 @@
         2186.0
       ],
       "latestPrice": 2186.0,
-      "dividendYield": 3.36,
+      "dividendYield": 3.43,
       "sma30": [
         null,
         null,
@@ -264989,7 +264989,7 @@
         1189.0
       ],
       "latestPrice": 1189.0,
-      "dividendYield": 2.63,
+      "dividendYield": 2.69,
       "sma30": [
         null,
         null,
@@ -266932,7 +266932,7 @@
         3452.0
       ],
       "latestPrice": 3452.0,
-      "dividendYield": 4.56,
+      "dividendYield": 4.63,
       "sma30": [
         null,
         null,
@@ -268875,7 +268875,7 @@
         3478.0
       ],
       "latestPrice": 3478.0,
-      "dividendYield": 2.23,
+      "dividendYield": 2.24,
       "sma30": [
         null,
         null,
@@ -270818,7 +270818,7 @@
         3324.0
       ],
       "latestPrice": 3324.0,
-      "dividendYield": 2.24,
+      "dividendYield": 2.26,
       "sma30": [
         null,
         null,
@@ -272761,7 +272761,7 @@
         3561.0
       ],
       "latestPrice": 3561.0,
-      "dividendYield": 1.71,
+      "dividendYield": 1.68,
       "sma30": [
         null,
         null,
@@ -274704,7 +274704,7 @@
         3382.0
       ],
       "latestPrice": 3382.0,
-      "dividendYield": 1.88,
+      "dividendYield": 1.89,
       "sma30": [
         null,
         null,
@@ -276647,7 +276647,7 @@
         1651.0
       ],
       "latestPrice": 1651.0,
-      "dividendYield": 2.15,
+      "dividendYield": 2.18,
       "sma30": [
         null,
         null,
@@ -278590,7 +278590,7 @@
         1431.5
       ],
       "latestPrice": 1431.5,
-      "dividendYield": 2.33,
+      "dividendYield": 2.38,
       "sma30": [
         null,
         null,
@@ -280533,7 +280533,7 @@
         6825.0
       ],
       "latestPrice": 6825.0,
-      "dividendYield": 3.24,
+      "dividendYield": 3.27,
       "sma30": [
         null,
         null,
@@ -282476,7 +282476,7 @@
         3730.0
       ],
       "latestPrice": 3730.0,
-      "dividendYield": 3.43,
+      "dividendYield": 3.49,
       "sma30": [
         null,
         null,
@@ -284419,7 +284419,7 @@
         5646.0
       ],
       "latestPrice": 5646.0,
-      "dividendYield": 3.67,
+      "dividendYield": 3.72,
       "sma30": [
         null,
         null,
@@ -286362,7 +286362,7 @@
         4908.0
       ],
       "latestPrice": 4908.0,
-      "dividendYield": 3.25,
+      "dividendYield": 3.26,
       "sma30": [
         null,
         null,
@@ -288305,7 +288305,7 @@
         4172.0
       ],
       "latestPrice": 4172.0,
-      "dividendYield": 2.8,
+      "dividendYield": 2.88,
       "sma30": [
         null,
         null,
@@ -290248,7 +290248,7 @@
         2127.5
       ],
       "latestPrice": 2127.5,
-      "dividendYield": 1.92,
+      "dividendYield": 1.88,
       "sma30": [
         null,
         null,
@@ -294134,7 +294134,7 @@
         5251.0
       ],
       "latestPrice": 5251.0,
-      "dividendYield": 2.05,
+      "dividendYield": 2.02,
       "sma30": [
         null,
         null,
@@ -296077,7 +296077,7 @@
         695.0
       ],
       "latestPrice": 695.0,
-      "dividendYield": 3.42,
+      "dividendYield": 3.45,
       "sma30": [
         null,
         null,
@@ -298020,7 +298020,7 @@
         2069.0
       ],
       "latestPrice": 2069.0,
-      "dividendYield": 3.84,
+      "dividendYield": 3.87,
       "sma30": [
         null,
         null,
@@ -299963,7 +299963,7 @@
         1883.0
       ],
       "latestPrice": 1883.0,
-      "dividendYield": 4.22,
+      "dividendYield": 4.25,
       "sma30": [
         null,
         null,
@@ -301906,7 +301906,7 @@
         3028.0
       ],
       "latestPrice": 3028.0,
-      "dividendYield": 70.0,
+      "dividendYield": 66.0,
       "sma30": [
         null,
         null,
@@ -303849,7 +303849,7 @@
         22795.0
       ],
       "latestPrice": 22795.0,
-      "dividendYield": 13.0,
+      "dividendYield": 12.0,
       "sma30": [
         null,
         null,
@@ -305792,7 +305792,7 @@
         5194.0
       ],
       "latestPrice": 5194.0,
-      "dividendYield": 2.31,
+      "dividendYield": 2.23,
       "sma30": [
         null,
         null,
@@ -307735,7 +307735,7 @@
         9610.0
       ],
       "latestPrice": 9610.0,
-      "dividendYield": 2.23,
+      "dividendYield": 2.16,
       "sma30": [
         null,
         null,
@@ -309678,7 +309678,7 @@
         9095.0
       ],
       "latestPrice": 9095.0,
-      "dividendYield": 3.79,
+      "dividendYield": 3.72,
       "sma30": [
         null,
         null,
@@ -311621,7 +311621,7 @@
         3901.0
       ],
       "latestPrice": 3901.0,
-      "dividendYield": 58.0,
+      "dividendYield": 56.0,
       "sma30": [
         null,
         null,
@@ -313564,7 +313564,7 @@
         2080.5
       ],
       "latestPrice": 2080.5,
-      "dividendYield": 1.9,
+      "dividendYield": 1.87,
       "sma30": [
         null,
         null,
@@ -315507,7 +315507,7 @@
         4952.0
       ],
       "latestPrice": 4952.0,
-      "dividendYield": 78.0,
+      "dividendYield": 77.0,
       "sma30": [
         null,
         null,
@@ -317173,7 +317173,7 @@
         3486.2,
         3502.7,
         3476.6,
-        3506.6,
+        3506.5,
         3593.6,
         3602.3,
         3664.1,
@@ -317450,7 +317450,7 @@
         5872.0
       ],
       "latestPrice": 5872.0,
-      "dividendYield": 3.06,
+      "dividendYield": 3.07,
       "sma30": [
         null,
         null,
@@ -317549,28 +317549,28 @@
         3520.86,
         3528.85,
         3534.13,
-        3539.81,
-        3546.16,
+        3539.8,
+        3546.15,
         3553.66,
         3562.62,
         3570.42,
         3578.28,
-        3587.44,
+        3587.43,
         3594.75,
-        3601.52,
-        3611.22,
+        3601.51,
+        3611.21,
         3620.98,
         3629.71,
-        3641.35,
+        3641.34,
         3650.82,
         3659.68,
-        3667.84,
+        3667.83,
         3677.15,
         3687.07,
         3697.64,
-        3710.86,
+        3710.85,
         3722.81,
-        3735.45,
+        3735.44,
         3747.5,
         3758.94,
         3766.8,
@@ -317914,7 +317914,7 @@
         3353.38,
         3358.84,
         3364.32,
-        3369.92,
+        3369.91,
         3375.62,
         3383.15,
         3394.18,
@@ -317933,8 +317933,8 @@
         3499.11,
         3506.62,
         3513.92,
-        3520.72,
-        3525.79,
+        3520.71,
+        3525.78,
         3531.34,
         3536.59,
         3542.49,
@@ -317942,7 +317942,7 @@
         3551.6,
         3555.37,
         3559.39,
-        3563.11,
+        3563.1,
         3566.68,
         3571.17,
         3576.1,
@@ -317958,7 +317958,7 @@
         3627.57,
         3633.32,
         3638.79,
-        3643.97,
+        3643.96,
         3650.09,
         3656.76,
         3664.44,
@@ -317971,7 +317971,7 @@
         3720.53,
         3728.16,
         3736.53,
-        3745.72,
+        3745.71,
         3754.23,
         3763.22,
         3771.75,
@@ -319393,7 +319393,7 @@
         2306.5
       ],
       "latestPrice": 2306.5,
-      "dividendYield": 1.86,
+      "dividendYield": 1.91,
       "sma30": [
         null,
         null,
@@ -321336,7 +321336,7 @@
         4976.0
       ],
       "latestPrice": 4976.0,
-      "dividendYield": 2.29,
+      "dividendYield": 2.31,
       "sma30": [
         null,
         null,
@@ -323279,7 +323279,7 @@
         7463.0
       ],
       "latestPrice": 7463.0,
-      "dividendYield": 1.66,
+      "dividendYield": 1.67,
       "sma30": [
         null,
         null,
@@ -325222,7 +325222,7 @@
         5161.0
       ],
       "latestPrice": 5161.0,
-      "dividendYield": 2.68,
+      "dividendYield": 2.71,
       "sma30": [
         null,
         null,
@@ -327165,7 +327165,7 @@
         1796.0
       ],
       "latestPrice": 1796.0,
-      "dividendYield": 2.17,
+      "dividendYield": 2.23,
       "sma30": [
         null,
         null,
@@ -329108,7 +329108,7 @@
         4947.0
       ],
       "latestPrice": 4947.0,
-      "dividendYield": 2.51,
+      "dividendYield": 2.53,
       "sma30": [
         null,
         null,
@@ -331051,7 +331051,7 @@
         5868.0
       ],
       "latestPrice": 5868.0,
-      "dividendYield": 2.39,
+      "dividendYield": 2.3,
       "sma30": [
         null,
         null,
@@ -332994,7 +332994,7 @@
         12620.0
       ],
       "latestPrice": 12620.0,
-      "dividendYield": 2.99,
+      "dividendYield": 3.01,
       "sma30": [
         null,
         null,
@@ -334937,7 +334937,7 @@
         3083.0
       ],
       "latestPrice": 3083.0,
-      "dividendYield": 3.0,
+      "dividendYield": 3.05,
       "sma30": [
         null,
         null,
@@ -336880,7 +336880,7 @@
         2358.0
       ],
       "latestPrice": 2358.0,
-      "dividendYield": 3.19,
+      "dividendYield": 3.27,
       "sma30": [
         null,
         null,
@@ -338546,7 +338546,7 @@
         2168.9,
         2204.6,
         2193.0,
-        2212.4,
+        2212.3,
         2260.7,
         2278.5,
         2320.6,
@@ -338823,7 +338823,7 @@
         2733.0
       ],
       "latestPrice": 2733.0,
-      "dividendYield": 3.59,
+      "dividendYield": 3.66,
       "sma30": [
         null,
         null,
@@ -338917,15 +338917,15 @@
         2130.61,
         2133.93,
         2139.23,
-        2145.43,
+        2145.42,
         2152.96,
         2162.03,
         2171.29,
-        2178.7,
-        2185.61,
-        2193.58,
-        2201.79,
-        2210.87,
+        2178.69,
+        2185.6,
+        2193.57,
+        2201.78,
+        2210.86,
         2220.49,
         2229.86,
         2237.96,
@@ -338935,15 +338935,15 @@
         2266.02,
         2272.38,
         2280.36,
-        2288.19,
+        2288.18,
         2295.98,
-        2303.89,
-        2313.52,
-        2323.55,
+        2303.88,
+        2313.51,
+        2323.54,
         2334.25,
         2344.14,
-        2353.77,
-        2361.87,
+        2353.76,
+        2361.86,
         2369.98,
         2377.92,
         2383.72,
@@ -339286,7 +339286,7 @@
         2037.34,
         2041.35,
         2046.04,
-        2050.88,
+        2050.87,
         2055.97,
         2060.86,
         2066.18,
@@ -339308,13 +339308,13 @@
         2147.96,
         2153.3,
         2158.73,
-        2164.17,
+        2164.16,
         2169.7,
         2175.14,
         2180.35,
         2185.58,
         2190.77,
-        2196.16,
+        2196.15,
         2200.41,
         2205.02,
         2210.56,
@@ -339324,7 +339324,7 @@
         2230.25,
         2234.44,
         2239.13,
-        2244.04,
+        2244.03,
         2248.88,
         2253.66,
         2257.48,
@@ -339334,16 +339334,16 @@
         2272.26,
         2276.74,
         2281.05,
-        2285.77,
+        2285.76,
         2290.84,
         2295.89,
         2301.03,
         2305.52,
-        2309.28,
-        2313.11,
+        2309.27,
+        2313.1,
         2316.69,
         2320.2,
-        2324.41,
+        2324.4,
         2328.99,
         2333.82,
         2339.81,
@@ -339354,11 +339354,11 @@
         2376.23,
         2383.62,
         2391.38,
-        2398.93,
+        2398.92,
         2406.98,
         2415.09,
         2423.74,
-        2432.67,
+        2432.66,
         2441.71,
         2449.25,
         2457.64,
@@ -340766,7 +340766,7 @@
         4979.0
       ],
       "latestPrice": 4979.0,
-      "dividendYield": 2.88,
+      "dividendYield": 2.93,
       "sma30": [
         null,
         null,
@@ -342709,7 +342709,7 @@
         4558.0
       ],
       "latestPrice": 4558.0,
-      "dividendYield": 1.99,
+      "dividendYield": 2.02,
       "sma30": [
         null,
         null,
@@ -344652,7 +344652,7 @@
         3350.0
       ],
       "latestPrice": 3350.0,
-      "dividendYield": 4.29,
+      "dividendYield": 4.36,
       "sma30": [
         null,
         null,
@@ -346595,7 +346595,7 @@
         2334.5
       ],
       "latestPrice": 2334.5,
-      "dividendYield": 2.2,
+      "dividendYield": 2.23,
       "sma30": [
         null,
         null,
@@ -348538,7 +348538,7 @@
         7391.0
       ],
       "latestPrice": 7391.0,
-      "dividendYield": 1.23,
+      "dividendYield": 1.24,
       "sma30": [
         null,
         null,
@@ -352424,7 +352424,7 @@
         2412.5
       ],
       "latestPrice": 2412.5,
-      "dividendYield": 2.63,
+      "dividendYield": 2.65,
       "sma30": [
         null,
         null,
@@ -354367,7 +354367,7 @@
         66330.0
       ],
       "latestPrice": 66330.0,
-      "dividendYield": 1.5,
+      "dividendYield": 1.51,
       "sma30": [
         null,
         null,
@@ -356310,7 +356310,7 @@
         7012.0
       ],
       "latestPrice": 7012.0,
-      "dividendYield": 2.69,
+      "dividendYield": 2.71,
       "sma30": [
         null,
         null,
@@ -358253,7 +358253,7 @@
         5978.0
       ],
       "latestPrice": 5978.0,
-      "dividendYield": 2.48,
+      "dividendYield": 2.43,
       "sma30": [
         null,
         null,
@@ -360196,7 +360196,7 @@
         5663.0
       ],
       "latestPrice": 5663.0,
-      "dividendYield": 3.35,
+      "dividendYield": 3.36,
       "sma30": [
         null,
         null,
@@ -362139,7 +362139,7 @@
         2749.5
       ],
       "latestPrice": 2749.5,
-      "dividendYield": 1.87,
+      "dividendYield": 1.89,
       "sma30": [
         null,
         null,
@@ -364082,7 +364082,7 @@
         4323.0
       ],
       "latestPrice": 4323.0,
-      "dividendYield": 1.55,
+      "dividendYield": 1.53,
       "sma30": [
         null,
         null,
@@ -365678,7 +365678,7 @@
         15966.3,
         15706.1,
         15612.9,
-        15897.6,
+        15897.5,
         15691.4,
         15730.7,
         15823.9,
@@ -366060,7 +366060,7 @@
         15847.32,
         15839.79,
         15823.43,
-        15822.29,
+        15822.28,
         15823.27,
         15820.98,
         15822.78,
@@ -366068,12 +366068,12 @@
         15838.65,
         15844.54,
         15867.77,
-        15861.23,
-        15872.03,
+        15861.22,
+        15872.02,
         15891.66,
         15916.69,
-        15929.62,
-        15932.89,
+        15929.61,
+        15932.88,
         15942.37,
         15954.64,
         15966.91,
@@ -367968,7 +367968,7 @@
         1082.0
       ],
       "latestPrice": 1082.0,
-      "dividendYield": 3.16,
+      "dividendYield": 3.14,
       "sma30": [
         null,
         null,
@@ -369911,7 +369911,7 @@
         384.8
       ],
       "latestPrice": 384.8,
-      "dividendYield": 3.4,
+      "dividendYield": 3.38,
       "sma30": [
         null,
         null,
@@ -373797,7 +373797,7 @@
         1176.0
       ],
       "latestPrice": 1176.0,
-      "dividendYield": 3.21,
+      "dividendYield": 3.23,
       "sma30": [
         null,
         null,
@@ -379626,7 +379626,7 @@
         2404.5
       ],
       "latestPrice": 2404.5,
-      "dividendYield": 1.65,
+      "dividendYield": 1.66,
       "sma30": [
         null,
         null,
@@ -381569,7 +381569,7 @@
         5586.0
       ],
       "latestPrice": 5586.0,
-      "dividendYield": 88.0,
+      "dividendYield": 90.0,
       "sma30": [
         null,
         null,
@@ -385455,7 +385455,7 @@
         2960.5
       ],
       "latestPrice": 2960.5,
-      "dividendYield": 1.37,
+      "dividendYield": 1.38,
       "sma30": [
         null,
         null,
@@ -387398,7 +387398,7 @@
         1249.0
       ],
       "latestPrice": 1249.0,
-      "dividendYield": 2.02,
+      "dividendYield": 2.08,
       "sma30": [
         null,
         null,
@@ -389341,7 +389341,7 @@
         1280.0
       ],
       "latestPrice": 1280.0,
-      "dividendYield": 3.83,
+      "dividendYield": 3.91,
       "sma30": [
         null,
         null,
@@ -391284,7 +391284,7 @@
         1485.0
       ],
       "latestPrice": 1485.0,
-      "dividendYield": 2.46,
+      "dividendYield": 2.49,
       "sma30": [
         null,
         null,
@@ -393227,7 +393227,7 @@
         3613.0
       ],
       "latestPrice": 3613.0,
-      "dividendYield": 1.36,
+      "dividendYield": 1.38,
       "sma30": [
         null,
         null,
@@ -395170,7 +395170,7 @@
         3236.0
       ],
       "latestPrice": 3236.0,
-      "dividendYield": 3.92,
+      "dividendYield": 4.02,
       "sma30": [
         null,
         null,
@@ -397113,7 +397113,7 @@
         3186.0
       ],
       "latestPrice": 3186.0,
-      "dividendYield": 1.6,
+      "dividendYield": 1.63,
       "sma30": [
         null,
         null,
@@ -399056,7 +399056,7 @@
         2960.0
       ],
       "latestPrice": 2960.0,
-      "dividendYield": 2.5,
+      "dividendYield": 2.53,
       "sma30": [
         null,
         null,
@@ -400999,7 +400999,7 @@
         1662.5
       ],
       "latestPrice": 1662.5,
-      "dividendYield": 1.9,
+      "dividendYield": 1.92,
       "sma30": [
         null,
         null,
@@ -402942,7 +402942,7 @@
         1799.5
       ],
       "latestPrice": 1799.5,
-      "dividendYield": 3.24,
+      "dividendYield": 3.33,
       "sma30": [
         null,
         null,
@@ -404885,7 +404885,7 @@
         780.4
       ],
       "latestPrice": 780.4,
-      "dividendYield": 2.75,
+      "dividendYield": 2.82,
       "sma30": [
         null,
         null,
@@ -406828,7 +406828,7 @@
         1375.5
       ],
       "latestPrice": 1375.5,
-      "dividendYield": 1.58,
+      "dividendYield": 1.6,
       "sma30": [
         null,
         null,
@@ -408771,7 +408771,7 @@
         3460.0
       ],
       "latestPrice": 3460.0,
-      "dividendYield": 2.36,
+      "dividendYield": 2.43,
       "sma30": [
         null,
         null,
@@ -410714,7 +410714,7 @@
         3036.0
       ],
       "latestPrice": 3036.0,
-      "dividendYield": 3.16,
+      "dividendYield": 3.21,
       "sma30": [
         null,
         null,
@@ -412657,7 +412657,7 @@
         3815.0
       ],
       "latestPrice": 3815.0,
-      "dividendYield": 83.0,
+      "dividendYield": 84.0,
       "sma30": [
         null,
         null,
@@ -414600,7 +414600,7 @@
         1983.0
       ],
       "latestPrice": 1983.0,
-      "dividendYield": 2.28,
+      "dividendYield": 2.32,
       "sma30": [
         null,
         null,
@@ -416543,7 +416543,7 @@
         5662.0
       ],
       "latestPrice": 5662.0,
-      "dividendYield": 1.78,
+      "dividendYield": 1.77,
       "sma30": [
         null,
         null,
@@ -418486,7 +418486,7 @@
         7490.0
       ],
       "latestPrice": 7490.0,
-      "dividendYield": 3.17,
+      "dividendYield": 3.2,
       "sma30": [
         null,
         null,
@@ -420429,7 +420429,7 @@
         7240.0
       ],
       "latestPrice": 7240.0,
-      "dividendYield": 2.76,
+      "dividendYield": 2.83,
       "sma30": [
         null,
         null,
@@ -422372,7 +422372,7 @@
         3497.0
       ],
       "latestPrice": 3497.0,
-      "dividendYield": 3.38,
+      "dividendYield": 3.43,
       "sma30": [
         null,
         null,
@@ -424057,7 +424057,7 @@
         3053.2,
         3032.9,
         3027.1,
-        3042.5,
+        3042.6,
         3038.7,
         3057.1,
         3026.1,
@@ -424315,7 +424315,7 @@
         3065.0
       ],
       "latestPrice": 3065.0,
-      "dividendYield": 3.12,
+      "dividendYield": 3.13,
       "sma30": [
         null,
         null,
@@ -424426,23 +424426,23 @@
         2977.0,
         2982.89,
         2987.82,
-        2994.7,
+        2994.71,
         3001.83,
         3008.39,
-        3013.46,
+        3013.47,
         3019.86,
-        3027.51,
-        3035.65,
+        3027.52,
+        3035.66,
         3043.07,
-        3047.48,
+        3047.49,
         3051.32,
-        3054.7,
+        3054.71,
         3055.8,
         3054.22,
-        3051.8,
-        3049.61,
+        3051.81,
+        3049.62,
         3046.81,
-        3042.55,
+        3042.56,
         3039.19,
         3034.32,
         3028.7,
@@ -424450,11 +424450,11 @@
         3011.64,
         3003.05,
         2997.36,
-        2992.95,
-        2987.0,
+        2992.96,
+        2987.01,
         2979.36,
         2971.47,
-        2965.99,
+        2966.0,
         2960.86,
         2954.44,
         2949.24,
@@ -424793,7 +424793,7 @@
         2813.27,
         2819.92,
         2826.34,
-        2832.3,
+        2832.31,
         2837.97,
         2844.14,
         2849.9,
@@ -424801,15 +424801,15 @@
         2861.98,
         2868.18,
         2873.86,
-        2877.92,
+        2877.93,
         2881.95,
         2886.23,
         2889.9,
-        2893.04,
+        2893.05,
         2895.92,
         2899.08,
         2902.2,
-        2904.91,
+        2904.92,
         2907.66,
         2909.97,
         2912.74,
@@ -424822,20 +424822,20 @@
         2920.19,
         2919.93,
         2919.6,
-        2919.88,
+        2919.89,
         2919.84,
         2920.25,
         2921.11,
         2922.33,
-        2923.67,
+        2923.68,
         2925.82,
         2928.4,
-        2930.11,
+        2930.12,
         2930.92,
         2930.78,
         2930.76,
-        2932.04,
-        2933.61,
+        2932.05,
+        2933.62,
         2934.84,
         2935.84,
         2936.86,
@@ -424844,24 +424844,24 @@
         2939.35,
         2940.66,
         2940.56,
-        2940.04,
+        2940.05,
         2939.68,
         2939.75,
         2940.73,
-        2940.55,
-        2941.2,
+        2940.56,
+        2941.21,
         2941.33,
         2941.36,
         2941.31,
         2941.57,
         2941.8,
         2941.58,
-        2940.5,
+        2940.51,
         2939.77,
         2939.28,
         2939.16,
-        2938.78,
-        2938.03,
+        2938.79,
+        2938.04,
         2937.33,
         2936.29,
         2934.8,
@@ -424872,13 +424872,13 @@
         2924.83,
         2922.69,
         2920.35,
-        2918.05,
+        2918.06,
         2915.23,
         2912.88,
         2911.19,
         2909.37,
         2908.56,
-        2907.46,
+        2907.47,
         2905.41,
         2903.98,
         2902.85,
@@ -426258,7 +426258,7 @@
         2981.5
       ],
       "latestPrice": 2981.5,
-      "dividendYield": 2.0,
+      "dividendYield": 2.01,
       "sma30": [
         null,
         null,
@@ -430144,7 +430144,7 @@
         2913.0
       ],
       "latestPrice": 2913.0,
-      "dividendYield": 2.36,
+      "dividendYield": 2.4,
       "sma30": [
         null,
         null,
@@ -432087,7 +432087,7 @@
         2905.5
       ],
       "latestPrice": 2905.5,
-      "dividendYield": 2.69,
+      "dividendYield": 2.75,
       "sma30": [
         null,
         null,
@@ -434030,7 +434030,7 @@
         6309.0
       ],
       "latestPrice": 6309.0,
-      "dividendYield": 1.86,
+      "dividendYield": 1.9,
       "sma30": [
         null,
         null,
@@ -435973,7 +435973,7 @@
         6073.0
       ],
       "latestPrice": 6073.0,
-      "dividendYield": 2.1,
+      "dividendYield": 2.14,
       "sma30": [
         null,
         null,
@@ -437916,7 +437916,7 @@
         337.0
       ],
       "latestPrice": 337.0,
-      "dividendYield": 2.95,
+      "dividendYield": 2.97,
       "sma30": [
         null,
         null,
@@ -441802,7 +441802,7 @@
         2142.0
       ],
       "latestPrice": 2142.0,
-      "dividendYield": 24.0,
+      "dividendYield": 23.0,
       "sma30": [
         null,
         null,
